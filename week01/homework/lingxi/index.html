@@ -67,6 +67,23 @@
 
         <!-- 底部输入区 -->
         <div class="input-section">
+            <!-- 图片缩略图预览区 -->
+            <div class="thumbnail-preview" id="thumbnailPreview" style="display: none;">
+                <div class="thumbnail-item">
+                    <img id="thumbnailImage" src="" alt="预览图片">
+                    <div class="thumbnail-info">
+                        <span class="thumbnail-name" id="thumbnailName">image</span>
+                        <span class="thumbnail-size" id="thumbnailSize">0KB</span>
+                    </div>
+                    <button class="remove-thumbnail" id="removeThumbnail">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
             <div class="input-container">
                 <textarea id="messageInput" placeholder="输入你的问题..." rows="1"></textarea>
                 <div class="input-actions">

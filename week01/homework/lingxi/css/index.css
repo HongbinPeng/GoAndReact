@@ -230,6 +230,20 @@ body.dark .clear-chat:hover {
     font-weight: bold;
     font-size: 0.9rem;
 }
+
+/* 用户消息中的图片 */
+.user-message .message-content .message-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: block;
+    object-fit: contain;
+}
+
+.user-message .message-content .message-text {
+    word-wrap: break-word;
+}
 .ai-message .message-content {
     background-color: white;
     color: #333;
@@ -416,6 +430,90 @@ body.dark .copy-btn:hover {
 
 body.dark .input-section {
     border-top: 1px solid #333;
+}
+
+/* 图片缩略图预览区 */
+.thumbnail-preview {
+    display: flex;
+    gap: 10px;
+    padding: 10px 16px;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+body.dark .thumbnail-preview {
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #333;
+}
+
+.thumbnail-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    max-width: 300px;
+}
+
+body.dark .thumbnail-item {
+    background-color: #3d3d3d;
+}
+
+.thumbnail-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.thumbnail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.thumbnail-name {
+    font-size: 0.85rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.dark .thumbnail-name {
+    color: #e0e0e0;
+}
+
+.thumbnail-size {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+body.dark .thumbnail-size {
+    color: #999;
+}
+
+.remove-thumbnail {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.remove-thumbnail:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #ff6b6b;
+}
+
+body.dark .remove-thumbnail:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .input-container {

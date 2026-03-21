@@ -15,13 +15,16 @@ let isStreaming = false;
 let abortController = null;
 // 对话历史
 const MAX_HISTORY = 4;
+// 图片相关
+let currentImageBase64 = null; // 当前上传图片的 Base64 编码
+let currentImageFile = null; // 当前图片文件对象
 
 // DOM 元素
 const elements = {
     themeToggle: document.getElementById('themeToggle'),//主题切换按钮
     welcomeSection: document.getElementById('welcomeSection'),//欢迎界面
     chatSection: document.getElementById('chatSection'),//对话界面
-    chatMessages: document.getElementById('chatMessages'),//对话界面的div
+    chatMessages: document.getElementById('chatMessages'),//对话界面的 div
     messageInput: document.getElementById('messageInput'),//输入框
     sendBtn: document.getElementById('sendBtn'),//发送按钮
     clearChat: document.getElementById('clearChat'),//清除对话按钮
@@ -29,7 +32,13 @@ const elements = {
     imageModal: document.getElementById('imageModal'),//图片预览模态框
     previewImage: document.getElementById('previewImage'),//图片预览模态框中的图片
     closeModal: document.querySelector('.close-modal'),//图片预览模态框中的关闭按钮
-    suggestionCards: document.querySelectorAll('.suggestion-card')//建议卡片
+    suggestionCards: document.querySelectorAll('.suggestion-card'),//建议卡片
+    // 图片缩略图相关
+    thumbnailPreview: document.getElementById('thumbnailPreview'),//缩略图预览容器
+    thumbnailImage: document.getElementById('thumbnailImage'),//缩略图图片
+    thumbnailName: document.getElementById('thumbnailName'),//缩略图文件名
+    thumbnailSize: document.getElementById('thumbnailSize'),//缩略图文件大小
+    removeThumbnail: document.getElementById('removeThumbnail')//移除缩略图按钮
 };
 
 // 发送按钮状态
@@ -144,6 +153,9 @@ function bindEvents() {
     // 文件上传
     elements.fileInput.addEventListener('change', handleFileUpload);
     
+    // 移除缩略图
+    elements.removeThumbnail.addEventListener('click', removeThumbnail);
+    
     // 图片预览模态框
     elements.closeModal.addEventListener('click', () => {
         elements.imageModal.style.display = 'none';
@@ -190,16 +202,26 @@ function sendMessage() {
     if (isSendBtnStopping) return;
     
     const message = elements.messageInput.value.trim();
-    if (!message) return;
+    const hasImage = currentImageBase64 !== null;
     
-    // 显示用户消息
-    addMessage('user', message);
+    // 检查是否有文本或图片
+    if (!message && !hasImage) return;
     
-    // 清空输入框
+    // 显示用户消息（包含图片）
+    addMessage('user', message, hasImage ? currentImageBase64 : null);
+    
+    // 保存当前图片的 Base64（用于发送）
+    const imageBase64ToSend = currentImageBase64;
+    
+    // 清空输入框和图片
     elements.messageInput.value = '';
     elements.sendBtn.disabled = true;
     // 重置输入框高度
     elements.messageInput.style.height = 'auto';
+    // 移除缩略图
+    if (hasImage) {
+        removeThumbnail();
+    }
     
     // 隐藏欢迎页面，显示对话页面
     elements.welcomeSection.style.display = 'none';
@@ -209,10 +231,10 @@ function sendMessage() {
     scrollToBottom();
     
     // 发送请求到 AI
-    sendToAI(message);
+    sendToAI(message, imageBase64ToSend);
 }
 
-function addMessage(type, content) {
+function addMessage(type, content, imageBase64 = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
     
@@ -225,8 +247,19 @@ function addMessage(type, content) {
             </div>
         `;
     } else {
+        // 用户消息，可能包含图片
+        let imageHtml = '';
+        if (imageBase64) {
+            imageHtml = `<img class="message-image" src="${imageBase64}" alt="上传的图片">`;
+        }
+        
+        let contentHtml = content ? `<div class="message-text">${content}</div>` : '';
+        
         messageDiv.innerHTML = `
-            <div class="message-content">${content}</div>
+            <div class="message-content">
+                ${imageHtml}
+                ${contentHtml}
+            </div>
             <div class="message-avatar">我</div>
         `;
     }
@@ -237,7 +270,7 @@ function addMessage(type, content) {
     return messageDiv;
 }
 
-function sendToAI(message) {
+function sendToAI(message, imageBase64 = null) {
     if (!API_KEY || !BASE_URL || !MODEL_NAME) {
         // 如果没有 API 配置，使用模拟响应
         simulateAIResponse(message);
@@ -269,7 +302,7 @@ function sendToAI(message) {
             // 只移除 AI 消息，保留用户消息
             const messages = elements.chatMessages.children;
             if (messages.length >= 1) {
-                // 只移除最后一条消息（AI消息）
+                // 只移除最后一条消息（AI 消息）
                 elements.chatMessages.removeChild(messages[messages.length - 1]);
             }
         }
@@ -291,10 +324,41 @@ function sendToAI(message) {
         messages.push(item);
     });
     
+    // 构建当前用户消息内容（支持多模态）
+    let userMessageContent;
+    if (imageBase64) {
+        // 包含图片的多模态消息
+        userMessageContent = [
+            {
+                type: 'image_url',
+                image_url: {
+                    url: imageBase64
+                }
+            }
+        ];
+        
+        // 如果有文本，也添加到内容中
+        if (message && message.trim()) {
+            userMessageContent.unshift({
+                type: 'text',
+                text: message
+            });
+        } else {
+            // 如果只有图片没有文本，添加一个默认的文本提示
+            userMessageContent.push({
+                type: 'text',
+                text: '请分析这张图片。'
+            });
+        }
+    } else {
+        // 纯文本消息
+        userMessageContent = message;
+    }
+    
     // 添加当前用户消息
     messages.push({
         role: 'user',
-        content: message
+        content: userMessageContent
     });
     
     // 调用阿里云百炼 OpenAI 兼容 API
@@ -507,22 +571,76 @@ function addCopyButtons(messageDiv) {
 // ==================== 图片上传 ====================
 
 function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    // 检查文件数量
+    if (files.length > 1) {
+        alert('一次只能上传 1 张图片！');
+        e.target.value = '';
+        return;
+    }
+    
+    const file = files[0];
     
     // 检查文件类型
     if (!file.type.startsWith('image/')) {
         alert('请上传图片文件！');
+        e.target.value = '';
         return;
     }
     
-    // 预览图片
+    // 检查文件大小（限制 10MB）
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+        alert('图片大小不能超过 10MB！');
+        e.target.value = '';
+        return;
+    }
+    
+    // 保存文件对象
+    currentImageFile = file;
+    
+    // 转换为 Base64
     const reader = new FileReader();
     reader.onload = function(e) {
-        elements.previewImage.src = e.target.result;
-        elements.imageModal.style.display = 'flex';
+        currentImageBase64 = e.target.result;
+        
+        // 显示缩略图预览
+        showThumbnail(file, currentImageBase64);
     };
     reader.readAsDataURL(file);
+}
+
+function showThumbnail(file, base64) {
+    // 设置缩略图信息
+    elements.thumbnailImage.src = base64;
+    elements.thumbnailName.textContent = file.name;
+    elements.thumbnailSize.textContent = formatFileSize(file.size);
+    
+    // 显示缩略图容器
+    elements.thumbnailPreview.style.display = 'flex';
+    
+    // 清空文件输入，允许重复选择同一文件
+    elements.fileInput.value = '';
+}
+
+function removeThumbnail() {
+    currentImageBase64 = null;
+    currentImageFile = null;
+    elements.thumbnailPreview.style.display = 'none';
+    elements.thumbnailImage.src = '';
+    elements.thumbnailName.textContent = '';
+    elements.thumbnailSize.textContent = '';
+    elements.fileInput.value = '';
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + sizes[i];
 }
 
 // ==================== 对话管理 ====================
