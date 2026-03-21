@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵犀 - AI 对话助手</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="js/index.js" defer></script>
+</head>
+<body class="light">
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 欢迎页面 -->
+        <div class="welcome-section" id="welcomeSection">
+            <h1 class="welcome-title">
+                <span class="gradient-text">灵犀</span>
+            </h1>
+            <p class="welcome-subtitle">智能对话助手，为你解答问题</p>
+            
+            <!-- 快捷建议卡片 -->
+            <div class="quick-suggestions">
+                <div class="suggestion-card" data-prompt="你好，我想了解一下今天的天气">
+                    <div class="card-icon weather">🌤️</div>
+                    <p class="card-text">今天天气如何？</p>
+                </div>
+                <div class="suggestion-card" data-prompt="请帮我写一篇关于环保的短文">
+                    <div class="card-icon writing">✍️</div>
+                    <p class="card-text">写一篇环保短文</p>
+                </div>
+                <div class="suggestion-card" data-prompt="如何学习编程？">
+                    <div class="card-icon code">💻</div>
+                    <p class="card-text">学习编程的方法</p>
+                </div>
+                <div class="suggestion-card" data-prompt="推荐一些好看的电影">
+                    <div class="card-icon movie">🎬</div>
+                    <p class="card-text">推荐好看的电影</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对话界面 -->
+        <div class="chat-section" id="chatSection">
+            <div class="chat-header">
+                <h2>对话</h2>
+                <button class="clear-chat" id="clearChat">清除对话</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+        </div>
+
+        <!-- 底部输入区 -->
+        <div class="input-section">
+            <div class="input-container">
+                <textarea id="messageInput" placeholder="输入你的问题..." rows="1"></textarea>
+                <div class="input-actions">
+                    <label class="upload-btn">
+                        <input type="file" id="fileInput" accept="image/*">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </label>
+                    <button class="send-btn" id="sendBtn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片预览模态框 -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img id="previewImage" src="" alt="预览图片">
+        </div>
+    </div>
+</body>
+</html>

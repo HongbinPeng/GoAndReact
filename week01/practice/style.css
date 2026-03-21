@@ -1,0 +1,260 @@
+/* 全局样式重置 */
+/* * 表示选择所有元素 */
+/* margin 和 padding 重置为 0，消除浏览器默认间距 */
+* {
+    margin: 0;
+    padding: 0;
+    /* box-sizing: border-box 让元素的宽度和高度包含内边距和边框 */
+    box-sizing: border-box;
+}
+
+/* 页面 body 样式 */
+body {
+    /* 设置字体为 Arial，备用字体为 sans-serif */
+    font-family: Arial, sans-serif;
+    /* 设置背景颜色为蓝色 (#4A90E2) */
+    background-color: #4A90E2;
+    /* 使用 Flexbox 布局，使内容居中显示 */
+    display: flex;
+    /* 水平居中 */
+    justify-content: center;
+    /* 垂直居中 */
+    align-items: center;
+    /* 最小高度为视口高度，确保内容垂直居中 */
+    min-height: 100vh;
+}
+
+/* TODO 列表容器样式 */
+.todo-container {
+    /* 背景颜色为白色 */
+    background-color: white;
+    /* 圆角边框，半径为 8px */
+    border-radius: 8px;
+    /* 盒子阴影，增加层次感 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* 内边距，容器内部与边缘的距离 */
+    padding: 20px;
+    /* 固定宽度为 400px */
+    width: 400px;
+    /* 最大宽度为 100%，在小屏幕上自动适应 */
+    max-width: 100%;
+}
+
+/* 任务输入框样式 */
+#task-input {
+    /* 宽度占满容器 */
+    width: 100%;
+    /* 内边距，使输入区域更大更舒适 */
+    padding: 10px;
+    /* 边框样式：1px 宽的灰色实线 */
+    border: 1px solid #E0E0E0;
+    /* 圆角边框 */
+    border-radius: 4px;
+    /* 字体大小 */
+    font-size: 16px;
+    /* 底部外边距，与下方元素保持距离 */
+    margin-bottom: 15px;
+}
+
+/* 过滤按钮容器样式 */
+.filter-buttons {
+    /* 使用 Flexbox 布局 */
+    display: flex;
+    /* 项目之间均匀分布，两端不留空 */
+    justify-content: space-between;
+    /* 底部外边距 */
+    margin-bottom: 15px;
+}
+
+/* 过滤按钮默认样式 */
+.filter-btn {
+    /* 无背景色 */
+    background: none;
+    /* 无边框 */
+    border: none;
+    /* 文字颜色为灰色 */
+    color: #666;
+    /* 内边距 */
+    padding: 5px 10px;
+    /* 鼠标指针变为手型 */
+    cursor: pointer;
+    /* 字体大小 */
+    font-size: 14px;
+}
+
+/* 过滤按钮激活状态样式 */
+/* .filter-btn.active 表示同时具有这两个类名的元素 */
+.filter-btn.active {
+    /* 文字颜色变为蓝色 */
+    color: #4A90E2;
+    /* 字体加粗 */
+    font-weight: bold;
+}
+
+/* 清空按钮样式 */
+.clear-btn {
+    /* 背景颜色为蓝色 */
+    background-color: #4A90E2;
+    /* 文字颜色为白色 */
+    color: white;
+    /* 无边框 */
+    border: none;
+    /* 圆角边框 */
+    border-radius: 4px;
+    /* 内边距 */
+    padding: 5px 10px;
+    /* 鼠标指针变为手型 */
+    cursor: pointer;
+    /* 字体大小 */
+    font-size: 14px;
+}
+
+/* 任务列表样式 */
+/* 去除列表默认的项目符号 */
+#task-list {
+    list-style: none;
+}
+
+/* 任务项样式 */
+.task-item {
+    /* 使用 Flexbox 布局 */
+    display: flex;
+    /* 水平方向两端对齐 */
+    justify-content: space-between;
+    /* 垂直方向居中对齐 */
+    align-items: center;
+    /* 内边距 */
+    padding: 10px;
+    /* 底部边框，分隔每个任务项 */
+    border-bottom: 1px solid #F0F0F0;
+    /* 相对定位，用于内部绝对定位元素的参考 */
+    position: relative;
+}
+
+/* 最后一个任务项不显示底部边框 */
+.task-item:last-child {
+    border-bottom: none;
+}
+
+/* 任务项中的复选框样式 */
+.task-item input[type="checkbox"] {
+    /* 右侧外边距，与文字保持距离 */
+    margin-right: 10px;
+}
+
+/* 任务内容容器样式 */
+.task-content {
+    /* 允许项目伸缩 */
+    flex: 1;
+    /* 使用 Flexbox 布局 */
+    display: flex;
+    /* 垂直方向居中对齐 */
+    align-items: center;
+}
+
+/* 任务文字样式 */
+.task-text {
+    /* 允许项目伸缩，占据剩余空间 */
+    flex: 1;
+}
+
+/* 已完成任务文字样式 */
+/* 当 task-text 同时具有 completed 类时应用此样式 */
+.task-text.completed {
+    /* 删除线效果，表示任务已完成 */
+    text-decoration: line-through;
+    /* 文字颜色变浅，表示已处理 */
+    color: #999;
+}
+
+/* 任务操作按钮容器样式 */
+/* 默认隐藏，鼠标悬停时显示 */
+.task-actions {
+    /* 默认不显示 */
+    display: none;
+    /* 绝对定位，相对于 task-item 定位 */
+    position: absolute;
+    /* 距离右侧 10px */
+    right: 10px;
+    /* 距离顶部 10px */
+    top: 10px;
+    /* 背景颜色为白色 */
+    background-color: white;
+    /* 盒子阴影 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* 圆角边框 */
+    border-radius: 4px;
+    /* 隐藏溢出内容 */
+    overflow: hidden;
+}
+
+/* 鼠标悬停任务项时显示操作按钮 */
+/* .task-item:hover 表示鼠标悬停在任务项时 */
+.task-item:hover .task-actions {
+    /* 显示操作按钮容器 */
+    display: flex;
+}
+
+/* 操作按钮通用样式 */
+.action-btn {
+    /* 无背景色 */
+    background: none;
+    /* 无边框 */
+    border: none;
+    /* 内边距 */
+    padding: 5px 10px;
+    /* 鼠标指针变为手型 */
+    cursor: pointer;
+    /* 字体大小 */
+    font-size: 14px;
+    /* 使用 Flexbox 布局 */
+    display: flex;
+    /* 垂直方向居中对齐 */
+    align-items: center;
+}
+
+/* 编辑按钮特定样式 */
+.action-btn.edit {
+    /* 文字颜色为蓝色 */
+    color: #4A90E2;
+    /* 底部边框，分隔编辑和删除按钮 */
+    border-bottom: 1px solid #F0F0F0;
+}
+
+/* 删除按钮特定样式 */
+.action-btn.delete {
+    /* 文字颜色为红色 */
+    color: #E74C3C;
+}
+
+/* 操作按钮悬停效果 */
+.action-btn:hover {
+    /* 背景颜色变为浅灰色 */
+    background-color: #F5F5F5;
+}
+
+/* 操作按钮中的 SVG 图标样式 */
+.action-btn svg {
+    /* 右侧外边距，与文字保持距离 */
+    margin-right: 5px;
+}
+
+/* 更多按钮（...）样式 */
+.task-item .more-btn {
+    /* 无背景色 */
+    background: none;
+    /* 无边框 */
+    border: none;
+    /* 鼠标指针变为手型 */
+    cursor: pointer;
+    /* 文字颜色为灰色 */
+    color: #999;
+    /* 字体大小 */
+    font-size: 16px;
+}
+
+/* 鼠标悬停任务项时隐藏更多按钮 */
+.task-item:hover .more-btn {
+    /* 不显示 */
+    display: none;
+}

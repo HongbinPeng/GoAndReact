@@ -1,0 +1,44 @@
+
+/* 后代选择器 */
+.classname img {
+    border: 2px solid red;
+}
+.parent{
+    font-size: 20px;
+}
+.parent > h1 {
+    color: red;
+}
+/* 后面覆盖前面 */
+.parent h1 {
+    color: blue;
+}
+/* 兄弟选择器 */
+.brother+li {
+    color: green;
+}
+/* 通用兄弟选择器 */
+.brother ~ li {
+    color: rgb(0, 4, 255);
+}
+/* 属性选择器 */
+/* a[href^="https"] {
+    color: red;
+} */
+/* 属性选择器 */
+/* a[href^="http"] {
+    color: blue;
+} */
+
+/* 伪类选择器 */
+/* 未访问的链接 */
+a:link { color: blue; }
+
+/* 已访问的链接 */
+a:visited { color: purple; }
+
+/* 鼠标悬停 */
+a:hover { text-decoration: none; }
+
+/* 正在点击 */
+a:active { color: red; }

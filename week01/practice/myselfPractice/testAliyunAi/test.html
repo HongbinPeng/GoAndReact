@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千问大模型测试</title>
+    <!-- Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        #outputText {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 200px;
+            white-space: pre-wrap;
+        }
+        /* Markdown 样式 */
+        #outputText h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 20px 0 10px 0;
+        }
+        #outputText h2 {
+            font-size: 20px;
+            color: #444;
+            margin: 18px 0 8px 0;
+        }
+        #outputText h3 {
+            font-size: 18px;
+            color: #555;
+            margin: 16px 0 6px 0;
+        }
+        #outputText pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+            position: relative;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #outputText code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+        #outputText table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+        #outputText table, #outputText th, #outputText td {
+            border: 1px solid #ddd;
+        }
+        #outputText th, #outputText td {
+            padding: 8px;
+            text-align: left;
+        }
+        #outputText th {
+            background-color: #f2f2f2;
+        }
+        #outputText p {
+            margin: 8px 0;
+        }
+        #outputText ul, #outputText ol {
+            margin: 8px 0 8px 20px;
+        }
+        #outputText li {
+            margin: 4px 0;
+        }
+        #outputText h1, #outputText h2, #outputText h3 {
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+        /* 复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+    </style>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Prism.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <!-- 常见语言支持 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+    <script src="./test.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>千问大模型测试</h1>
+        <input type="text" id="input" placeholder="请输入问题...">
+        <button id="btn">发送</button>
+        <div id="output">
+            <div id="outputText"></div>
+        </div>
+    </div>
+</body>
+</html>

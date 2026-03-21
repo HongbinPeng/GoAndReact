@@ -1,0 +1,1 @@
+console.log("我是script2.js 中的内容")

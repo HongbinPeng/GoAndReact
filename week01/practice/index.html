@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- HTML5 文档声明，告知浏览器使用 HTML5 标准解析页面 -->
+<html lang="zh-CN">
+<head>
+    <!-- 设置字符编码为 UTF-8，支持中文显示 -->
+    <meta charset="UTF-8">
+    <!-- 视口设置，确保页面在移动设备上正确缩放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 页面标题，显示在浏览器标签页上 -->
+    <title>TODO 列表</title>
+
+    <!-- 引入外部 CSS 样式表文件 -->
+    <!-- rel="stylesheet" 表示这是一个样式表资源 -->
+    <!-- href 指定了样式表文件的路径 -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 设置网站图标，显示在浏览器标签页上 -->
+    <link rel="icon" href="favicon.ico">
+</head>
+
+<!-- 页面主体内容开始 -->
+<body>
+    <!-- TODO 列表容器，用于包裹整个应用界面 -->
+    <div class="todo-container">
+        <!-- 任务输入框，用于添加新任务 -->
+        <!-- type="text" 表示这是一个文本输入框 -->
+        <!-- id="task-input" 用于 JavaScript 中获取这个元素 -->
+        <!-- placeholder 属性设置输入框的占位提示文字 -->
+        <input type="text" id="task-input" placeholder="添加任务" />
+
+        <!-- 过滤按钮容器，用于筛选不同状态的任务 -->
+        <div class="filter-buttons">
+            <!-- data-filter 属性用于标识每个按钮对应的过滤类型 -->
+            <!-- class="active" 表示默认选中"所有"按钮 -->
+            <button class="filter-btn active" data-filter="all">所有</button>
+            <button class="filter-btn" data-filter="active">进行中</button>
+            <button class="filter-btn" data-filter="completed">已完成</button>
+            <!-- 清空按钮，用于删除所有任务 -->
+            <button class="clear-btn">清空</button>
+        </div>
+
+        <!-- 任务列表容器，用于显示所有任务项 -->
+        <!-- id="task-list" 用于 JavaScript 中动态添加任务项 -->
+        <ul id="task-list">
+            <!-- 任务项将通过 JavaScript 动态添加到这里 -->
+        </ul>
+    </div>
+
+    <!-- 引入外部 JavaScript 脚本文件 -->
+    <!-- src 属性指定了脚本文件的路径 -->
+    <!-- 放在 body 末尾可以确保页面渲染完成后再执行脚本，提高性能 -->
+    <script src="script.js"></script>
+</body>
+</html>

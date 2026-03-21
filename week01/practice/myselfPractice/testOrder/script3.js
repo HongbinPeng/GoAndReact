@@ -1,0 +1,1 @@
+console.log("我是script3.js 中的内容")

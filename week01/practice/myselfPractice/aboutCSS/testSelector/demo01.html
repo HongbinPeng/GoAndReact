@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="demo01.css">
+</head>
+<body>
+    <div class="classname">
+    <img src="../imgs/ikun.png" alt="直接子元素">
+    <div>
+        <img src="../imgs/ikun.png" alt="孙子元素">
+        <div>
+            <img src="../imgs/ikun.png" alt="曾孙子元素">
+        </div>
+    </div>
+    <!-- /* 子选择器 */ -->
+    <div class="parent"> 
+        <h1>我是父元素</h1>
+        <div>
+            <h1>我是孙子元素</h1>
+        </div>
+    </div>
+    <!-- /* 兄弟选择器 -->
+    <ul>
+        <li >我是第一个子元素</li>
+        <li class="brother">我是第二个子元素</li>
+        <div>
+            <li>我是第三个子元素</li>
+        </div>
+        <li>我是第三个子元素</li>
+        <li>我是第四个子元素</li>
+        <li>我是第五个子元素</li>
+    </ul>
+    <a href="https://www.baidu.com">跳转百度</a>
+    <a href="http://www.taobao.com">跳转淘宝</a>
+</div>
+</body>
+</html>
