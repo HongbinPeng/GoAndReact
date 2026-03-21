@@ -51,6 +51,14 @@ function init() {
 // ==================== 主题相关 ====================
 
 function loadTheme() {
+    try {
+        const theme = localStorage.getItem('theme');
+        if (theme) {
+            currentTheme = theme;
+        }
+    } catch (e) {
+        console.warn('无法读取主题设置:', e);
+    }
     document.body.className = currentTheme;
     updateThemeIcon();
 }
@@ -58,7 +66,11 @@ function loadTheme() {
 function toggleTheme() {
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.body.className = currentTheme;
-    localStorage.setItem('theme', currentTheme);
+    try {
+        localStorage.setItem('theme', currentTheme);
+    } catch (e) {
+        console.warn('无法保存主题设置:', e);
+    }
     updateThemeIcon();
 }
 
@@ -75,9 +87,16 @@ function updateThemeIcon() {
 
 function loadAPIConfig() {
     // 尝试从 localStorage 加载
-    API_KEY = localStorage.getItem('LINGXI_API_KEY') || '';
-    BASE_URL = localStorage.getItem('EMB_BASE_URL') || '';
-    MODEL_NAME = localStorage.getItem('EMB_MODEL_NAME') || '';
+    try {
+        API_KEY = localStorage.getItem('LINGXI_API_KEY') || '';
+        BASE_URL = localStorage.getItem('EMB_BASE_URL') || '';
+        MODEL_NAME = localStorage.getItem('EMB_MODEL_NAME') || '';
+    } catch (e) {
+        console.warn('无法从 localStorage 加载 API 配置:', e);
+        API_KEY = '';
+        BASE_URL = '';
+        MODEL_NAME = '';
+    }
     
     // 如果没有，使用默认配置（直接从 .env 文件内容获取）
     if (!API_KEY || !BASE_URL || !MODEL_NAME) {
@@ -87,9 +106,13 @@ function loadAPIConfig() {
         MODEL_NAME = 'qwen3.5-plus';
         
         // 保存到 localStorage
-        localStorage.setItem('LINGXI_API_KEY', API_KEY);
-        localStorage.setItem('EMB_BASE_URL', BASE_URL);
-        localStorage.setItem('EMB_MODEL_NAME', MODEL_NAME);
+        try {
+            localStorage.setItem('LINGXI_API_KEY', API_KEY);
+            localStorage.setItem('EMB_BASE_URL', BASE_URL);
+            localStorage.setItem('EMB_MODEL_NAME', MODEL_NAME);
+        } catch (e) {
+            console.warn('无法保存 API 配置到 localStorage:', e);
+        }
     }
 }
 
@@ -266,6 +289,12 @@ function sendToAI(message) {
     // 添加对话历史作为上下文
     chatHistory.forEach(item => {
         messages.push(item);
+    });
+    
+    // 添加当前用户消息
+    messages.push({
+        role: 'user',
+        content: message
     });
     
     // 调用阿里云百炼 OpenAI 兼容 API
@@ -499,14 +528,23 @@ function handleFileUpload(e) {
 // ==================== 对话管理 ====================
 
 function getChatHistory() {
-    const history = localStorage.getItem('lingxi_chat_history');
-    return history ? JSON.parse(history) : [];
+    try {
+        const history = localStorage.getItem('lingxi_chat_history');
+        return history ? JSON.parse(history) : [];
+    } catch (e) {
+        console.warn('无法读取对话历史:', e);
+        return [];
+    }
 }
 
 function saveChatHistory(history) {
     // 只保存最近的 MAX_HISTORY 轮对话
-    const trimmedHistory = history.slice(-MAX_HISTORY * 2); // 每轮对话包含用户和AI两条消息
-    localStorage.setItem('lingxi_chat_history', JSON.stringify(trimmedHistory));
+    const trimmedHistory = history.slice(-MAX_HISTORY * 2); // 每轮对话包含用户和 AI 两条消息
+    try {
+        localStorage.setItem('lingxi_chat_history', JSON.stringify(trimmedHistory));
+    } catch (e) {
+        console.warn('无法保存对话历史:', e);
+    }
 }
 
 function addToChatHistory(role, content) {
@@ -520,7 +558,11 @@ function clearChat() {
         elements.chatMessages.innerHTML = '';
         elements.welcomeSection.style.display = 'flex';
         elements.chatSection.style.display = 'none';
-        localStorage.removeItem('lingxi_chat_history');
+        try {
+            localStorage.removeItem('lingxi_chat_history');
+        } catch (e) {
+            console.warn('无法清除对话历史:', e);
+        }
     }
 }
 
