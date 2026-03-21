@@ -262,10 +262,55 @@ body.dark .ai-message .message-content {
     white-space: pre-wrap;
     word-wrap: break-word;
     line-height: 1.4;
+    max-height: 150px;
+    overflow-y: scroll !important;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    font-style: italic;
+    font-size: 0.9rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    display: none;
+    min-height: 40px;
+}
+
+.reasoning-content.has-content {
+    display: block !important;
 }
 
 body.dark .reasoning-content {
     background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 自定义滚动条样式 */
+.reasoning-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.reasoning-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.reasoning-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+.reasoning-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+body.dark .reasoning-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .reasoning-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+body.dark .reasoning-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 /* 消息内容样式 */

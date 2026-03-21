@@ -14,7 +14,7 @@ let MODEL_NAME = '';
 let isStreaming = false;
 let abortController = null;
 // 对话历史
-const MAX_HISTORY = 3;
+const MAX_HISTORY = 4;
 
 // DOM 元素
 const elements = {
@@ -172,9 +172,6 @@ function sendMessage() {
     // 显示用户消息
     addMessage('user', message);
     
-    // 将用户消息添加到对话历史
-    addToChatHistory('user', message);
-    
     // 清空输入框
     elements.messageInput.value = '';
     elements.sendBtn.disabled = true;
@@ -200,7 +197,7 @@ function addMessage(type, content) {
         messageDiv.innerHTML = `
             <div class="message-avatar">灵</div>
             <div class="message-content">
-                <div class="reasoning-content" style="display: none; margin-bottom: 10px; padding: 10px; background-color: rgba(0, 0, 0, 0.05); border-radius: 8px; font-style: italic;"></div>
+                <div class="reasoning-content"></div>
                 <div class="actual-content">${content}</div>
             </div>
         `;
@@ -246,8 +243,12 @@ function sendToAI(message) {
             isStreaming = false;
             // 恢复发送按钮
             restoreSendButton();
-            // 移除 AI 消息
-            aiMessageDiv.remove();
+            // 只移除 AI 消息，保留用户消息
+            const messages = elements.chatMessages.children;
+            if (messages.length >= 1) {
+                // 只移除最后一条消息（AI消息）
+                elements.chatMessages.removeChild(messages[messages.length - 1]);
+            }
         }
     };
     
@@ -288,6 +289,7 @@ function sendToAI(message) {
         
         const reader = response.body.getReader();
         let aiResponse = '';
+        let currentReasoning = '';
         let isFirstChunk = true;
         
         function processChunk({ done, value }) {
@@ -300,10 +302,11 @@ function sendToAI(message) {
                 // 确保思考过程可见
                 const reasoningContent = aiMessageDiv.querySelector('.reasoning-content');
                 if (reasoningContent.textContent.trim()) {
-                    reasoningContent.style.display = 'block';
+                    reasoningContent.classList.add('has-content');
                 }
                 addCopyButtons(aiMessageDiv);
-                // 将 AI 响应添加到对话历史
+                // 将用户消息和 AI 响应添加到对话历史
+                addToChatHistory('user', message);
                 addToChatHistory('assistant', aiResponse);
                 return;
             }
@@ -319,7 +322,6 @@ function sendToAI(message) {
             
             let hasContentUpdate = false;
             let hasReasoningUpdate = false;
-            let currentReasoning = '';
             
             lines.forEach(line => {
                 line = line.trim();
@@ -358,8 +360,10 @@ function sendToAI(message) {
                 const cleanedReasoning = currentReasoning.replace(/[\*`]/g, '');
                 const reasoningContent = aiMessageDiv.querySelector('.reasoning-content');
                 reasoningContent.textContent = cleanedReasoning;
-                reasoningContent.style.display = 'block';
-                scrollToBottom();
+                // 添加 has-content 类来显示思考过程区域
+                reasoningContent.classList.add('has-content');
+                // 滚动到思考内容底部
+                reasoningContent.scrollTop = reasoningContent.scrollHeight;
             }
             
             // 批量更新 DOM，减少重绘
@@ -379,9 +383,16 @@ function sendToAI(message) {
             aiMessageDiv.querySelector('.actual-content').textContent = '抱歉，我暂时无法回答你的问题。请稍后再试。';
             // 恢复发送按钮
             restoreSendButton();
+            // 将用户消息和 AI 错误响应添加到对话历史
+            addToChatHistory('user', message);
+            addToChatHistory('assistant', '抱歉，我暂时无法回答你的问题。请稍后再试。');
         } else {
-            // 如果是用户中止，移除 AI 消息
-            aiMessageDiv.remove();
+            // 如果是用户中止，只移除 AI 消息，保留用户消息
+            const messages = elements.chatMessages.children;
+            if (messages.length >= 1) {
+                // 只移除最后一条消息（AI消息）
+                elements.chatMessages.removeChild(messages[messages.length - 1]);
+            }
         }
         isStreaming = false;
     });
@@ -392,8 +403,6 @@ function restoreSendButton() {
     elements.sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
     elements.sendBtn.disabled = !elements.messageInput.value.trim();
     isSendBtnStopping = false;
-    // 重新绑定发送消息事件
-    elements.sendBtn.onclick = sendMessage;
 }
 
 function simulateAIResponse(message) {
@@ -425,7 +434,8 @@ function simulateAIResponse(message) {
         } else {
             clearInterval(interval);
             addCopyButtons(aiMessageDiv);
-            // 将 AI 响应添加到对话历史
+            // 将用户消息和 AI 响应添加到对话历史
+            addToChatHistory('user', message);
             addToChatHistory('assistant', response);
         }
     }, typingSpeed);
