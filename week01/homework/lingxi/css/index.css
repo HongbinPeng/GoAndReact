@@ -7,18 +7,31 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
-    transition: all 0.3s ease;
+    min-height: 100vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+    transition: background 0.35s ease, color 0.3s ease;
 }
 
 /* 浅色主题 */
 body.light {
-    background-color: #f5f5f5;
+    background-color: #edf3ff;
+    background-image:
+        radial-gradient(circle at 12% 16%, rgba(137, 186, 255, 0.55) 0%, rgba(137, 186, 255, 0) 28%),
+        radial-gradient(circle at 84% 14%, rgba(194, 172, 255, 0.42) 0%, rgba(194, 172, 255, 0) 24%),
+        radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0) 38%),
+        linear-gradient(180deg, #f8fbff 0%, #eef4ff 48%, #e6eeff 100%);
     color: #333;
 }
 
 /* 深色主题 */
 body.dark {
-    background-color: #1a1a1a;
+    background-color: #0b1020;
+    background-image:
+        radial-gradient(circle at 16% 18%, rgba(61, 116, 255, 0.22) 0%, rgba(61, 116, 255, 0) 28%),
+        radial-gradient(circle at 86% 12%, rgba(126, 92, 255, 0.18) 0%, rgba(126, 92, 255, 0) 24%),
+        radial-gradient(circle at 50% 100%, rgba(42, 54, 92, 0.22) 0%, rgba(42, 54, 92, 0) 42%),
+        linear-gradient(180deg, #161d31 0%, #101728 52%, #0b1020 100%);
     color: #e0e0e0;
 }
 
@@ -34,25 +47,36 @@ body.dark {
 
 /* 主题切换按钮 */
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(98, 120, 179, 0.14);
     color: inherit;
     cursor: pointer;
-    padding: 10px;
     border-radius: 50%;
-    transition: background-color 0.3s ease;
-    z-index: 1000;
+    box-shadow: 0 10px 24px rgba(26, 41, 84, 0.12);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .theme-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 1);
+    border-color: rgba(98, 120, 179, 0.24);
+}
+
+body.dark .theme-toggle {
+    background-color: rgba(48, 58, 90, 0.94);
+    border-color: rgba(136, 153, 206, 0.18);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
 body.dark .theme-toggle:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(60, 72, 108, 0.98);
+    border-color: rgba(157, 175, 229, 0.3);
 }
 
 /* 欢迎页面 */
@@ -160,28 +184,6 @@ body.dark .chat-header {
 .chat-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
-}
-
-.clear-chat {
-    background: none;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-body.dark .clear-chat {
-    border: 1px solid #444;
-}
-
-.clear-chat:hover {
-    background-color: #f5f5f5;
-}
-
-body.dark .clear-chat:hover {
-    background-color: #333;
 }
 
 .chat-messages {
@@ -365,33 +367,132 @@ body.dark .reasoning-content::-webkit-scrollbar-thumb:hover {
 }
 
 .message-content code {
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem;
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.06);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-family: 'Cascadia Code', 'Courier New', Courier, monospace;
+    font-size: 0.92rem;
 }
 
 body.dark .message-content code {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #f5f7ff;
 }
 
-.message-content pre {
-    background-color: #f5f5f5;
-    padding: 12px;
-    border-radius: 8px;
+.message-content pre,
+.message-content pre[class*="language-"] {
+    background: linear-gradient(180deg, #f8faff 0%, #eef2f8 100%);
+    padding: 16px 18px;
+    border-radius: 14px;
     overflow-x: auto;
-    margin: 10px 0;
+    margin: 14px 0;
     position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 
-body.dark .message-content pre {
-    background-color: #2d2d2d;
+body.dark .message-content pre,
+body.dark .message-content pre[class*="language-"] {
+    background: linear-gradient(180deg, #1f2638 0%, #161c2b 100%);
+    border: 1px solid rgba(119, 136, 184, 0.24);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
 }
 
-.message-content pre code {
+.message-content pre code,
+.message-content pre[class*="language-"] code[class*="language-"] {
     background: none;
     padding: 0;
+    display: block;
+    font-family: 'Cascadia Code', 'Courier New', Courier, monospace;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    white-space: pre;
+    text-shadow: none;
+}
+
+body.dark .message-content code[class*="language-"],
+body.dark .message-content pre[class*="language-"],
+body.dark .message-content pre[class*="language-"] code[class*="language-"] {
+    color: #eaf2ff;
+    text-shadow: none;
+}
+
+body.dark .message-content pre[class*="language-"]::-webkit-scrollbar {
+    height: 10px;
+}
+
+body.dark .message-content pre[class*="language-"]::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+}
+
+body.dark .message-content pre[class*="language-"]::-webkit-scrollbar-thumb {
+    background: rgba(134, 153, 210, 0.42);
+    border-radius: 999px;
+}
+
+body.dark .message-content pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
+    background: rgba(160, 180, 238, 0.58);
+}
+
+body.dark .message-content pre[class*="language-"] .token.comment,
+body.dark .message-content pre[class*="language-"] .token.prolog,
+body.dark .message-content pre[class*="language-"] .token.doctype,
+body.dark .message-content pre[class*="language-"] .token.cdata {
+    color: #7f8caf;
+}
+
+body.dark .message-content pre[class*="language-"] .token.punctuation {
+    color: #d8e1ff;
+}
+
+body.dark .message-content pre[class*="language-"] .token.property,
+body.dark .message-content pre[class*="language-"] .token.tag,
+body.dark .message-content pre[class*="language-"] .token.constant,
+body.dark .message-content pre[class*="language-"] .token.symbol,
+body.dark .message-content pre[class*="language-"] .token.deleted {
+    color: #ff8ba7;
+}
+
+body.dark .message-content pre[class*="language-"] .token.boolean,
+body.dark .message-content pre[class*="language-"] .token.number {
+    color: #f7c66b;
+}
+
+body.dark .message-content pre[class*="language-"] .token.selector,
+body.dark .message-content pre[class*="language-"] .token.attr-name,
+body.dark .message-content pre[class*="language-"] .token.string,
+body.dark .message-content pre[class*="language-"] .token.char,
+body.dark .message-content pre[class*="language-"] .token.builtin,
+body.dark .message-content pre[class*="language-"] .token.inserted {
+    color: #9fe870;
+}
+
+body.dark .message-content pre[class*="language-"] .token.operator,
+body.dark .message-content pre[class*="language-"] .token.entity,
+body.dark .message-content pre[class*="language-"] .token.url,
+body.dark .message-content pre[class*="language-"] .language-css .token.string,
+body.dark .message-content pre[class*="language-"] .style .token.string {
+    color: #8fd6ff;
+    background: none;
+}
+
+body.dark .message-content pre[class*="language-"] .token.atrule,
+body.dark .message-content pre[class*="language-"] .token.attr-value,
+body.dark .message-content pre[class*="language-"] .token.keyword {
+    color: #7eb0ff;
+}
+
+body.dark .message-content pre[class*="language-"] .token.function,
+body.dark .message-content pre[class*="language-"] .token.class-name {
+    color: #c8a6ff;
+}
+
+body.dark .message-content pre[class*="language-"] .token.regex,
+body.dark .message-content pre[class*="language-"] .token.important,
+body.dark .message-content pre[class*="language-"] .token.variable {
+    color: #ffd580;
 }
 
 .copy-btn {
@@ -399,16 +500,18 @@ body.dark .message-content pre {
     top: 8px;
     right: 8px;
     background: rgba(0, 0, 0, 0.1);
-    border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 5px 10px;
     font-size: 0.8rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 body.dark .copy-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(21, 28, 44, 0.88);
+    color: #eef2ff;
+    border-color: rgba(119, 136, 184, 0.3);
 }
 
 .copy-btn:hover {
@@ -416,20 +519,22 @@ body.dark .copy-btn {
 }
 
 body.dark .copy-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(39, 49, 76, 0.96);
+    border-color: rgba(147, 167, 224, 0.45);
 }
 
 /* 底部输入区 */
 .input-section {
     position: sticky;
     bottom: 0;
-    background-color: inherit;
+    background: linear-gradient(180deg, rgba(248, 251, 255, 0) 0%, rgba(248, 251, 255, 0.76) 28%, rgba(230, 238, 255, 0.96) 100%);
     padding: 20px 0;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid rgba(224, 224, 224, 0.7);
 }
 
 body.dark .input-section {
-    border-top: 1px solid #333;
+    background: linear-gradient(180deg, rgba(11, 16, 32, 0) 0%, rgba(11, 16, 32, 0.72) 28%, rgba(11, 16, 32, 0.96) 100%);
+    border-top: 1px solid rgba(76, 88, 120, 0.5);
 }
 
 /* 图片缩略图预览区 */
@@ -516,9 +621,17 @@ body.dark .remove-thumbnail:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+.composer-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 .input-container {
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 0;
     background-color: white;
     border-radius: 25px;
     padding: 8px 16px;
@@ -548,6 +661,39 @@ body.dark .input-container {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.clear-chat {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(98, 120, 179, 0.14);
+    color: inherit;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 10px 24px rgba(26, 41, 84, 0.12);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.clear-chat:hover {
+    transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 1);
+    border-color: rgba(98, 120, 179, 0.24);
+}
+
+body.dark .clear-chat {
+    background-color: rgba(48, 58, 90, 0.94);
+    border-color: rgba(136, 153, 206, 0.18);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+body.dark .clear-chat:hover {
+    background-color: rgba(60, 72, 108, 0.98);
+    border-color: rgba(157, 175, 229, 0.3);
 }
 
 .upload-btn {
@@ -668,6 +814,16 @@ body.dark .modal-content {
     .message {
         max-width: 90%;
     }
+
+    .composer-row {
+        gap: 12px;
+    }
+
+    .theme-toggle,
+    .clear-chat {
+        width: 48px;
+        height: 48px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -681,5 +837,15 @@ body.dark .modal-content {
     
     .container {
         padding: 10px;
+    }
+
+    .composer-row {
+        gap: 10px;
+    }
+
+    .theme-toggle,
+    .clear-chat {
+        width: 44px;
+        height: 44px;
     }
 }

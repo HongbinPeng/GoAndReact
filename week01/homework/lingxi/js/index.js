@@ -18,9 +18,14 @@ const MAX_HISTORY = 4;
 // 图片相关
 let currentImageBase64 = null; // 当前上传图片的 Base64 编码
 let currentImageFile = null; // 当前图片文件对象
+const PRISM_THEMES = {
+    light: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css',
+    dark: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css'
+};
 
 // DOM 元素
 const elements = {
+    prismTheme: document.getElementById('prismTheme'),//Prism 代码高亮主题
     themeToggle: document.getElementById('themeToggle'),//主题切换按钮
     welcomeSection: document.getElementById('welcomeSection'),//欢迎界面
     chatSection: document.getElementById('chatSection'),//对话界面
@@ -69,6 +74,7 @@ function loadTheme() {
         console.warn('无法读取主题设置:', e);
     }
     document.body.className = currentTheme;
+    updatePrismTheme();
     updateThemeIcon();
 }
 
@@ -80,7 +86,16 @@ function toggleTheme() {
     } catch (e) {
         console.warn('无法保存主题设置:', e);
     }
+    updatePrismTheme();
     updateThemeIcon();
+}
+
+function updatePrismTheme() {
+    if (!elements.prismTheme) return;
+    const targetTheme = PRISM_THEMES[currentTheme] || PRISM_THEMES.light;
+    if (elements.prismTheme.getAttribute('href') !== targetTheme) {
+        elements.prismTheme.setAttribute('href', targetTheme);
+    }
 }
 
 function updateThemeIcon() {

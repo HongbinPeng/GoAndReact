@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form>
+        <input type="text" name="username" placeholder="请输入用户名">
+        <input type="password" name="password" placeholder="请输入密码">
+        <input type="submit" value="登录">
+    </form>
+</body>
+<script>
+    // 1. 创建一个FormData对象
+    const formData = new FormData();
+    console.log(formData);
+    //为什么需要使用entries方法？
+    // 因为FormData对象是一个迭代器对象，不能直接使用for循环遍历，需要使用entries方法转换为数组
+    console.log(formData.entries());
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        console.log(formData);
+    });
+</script>
+</html>

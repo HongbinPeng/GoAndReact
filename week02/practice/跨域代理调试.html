@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>配置跨域后点击按钮进行截图</title>
+    <style>
+      body {
+        font-family: system-ui, "Segoe UI", sans-serif;
+        margin: 16px;
+        line-height: 1.5;
+      }
+      #btn {
+        margin-bottom: 12px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="btn" type="button">点我截图</button>
+
+    <p>
+      <a href="https://www.runoob.com/images/logo.png" download="logo.png">
+        <img
+          border="0"
+          src="https://www.runoob.com/images/logo.png"
+          alt="runoob.com"
+        />
+      </a>
+    </p>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/1.4.1/html2canvas.js"></script>
+    <script>
+      function djb2Hex(str) {
+        let h = 5381;
+        for (let i = 0; i < str.length; i++) {
+          h = ((h << 5) + h) ^ str.charCodeAt(i);
+        }
+        return (h >>> 0).toString(16).padStart(8, "0");
+      }
+
+      async function sha256Hex(str) {
+        if (window.crypto && crypto.subtle) {
+          const buf = await crypto.subtle.digest(
+            "SHA-256",
+            new TextEncoder().encode(str)
+          );
+          return Array.from(new Uint8Array(buf))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        }
+        return djb2Hex(str) + djb2Hex(str + "|fb");
+      }
+
+      function getWebGLInfo() {
+        try {
+          const c = document.createElement("canvas");
+          const gl =
+            c.getContext("webgl") || c.getContext("experimental-webgl");
+          if (!gl) return { vendor: "不支持", renderer: "不支持" };
+          const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+          return {
+            vendor: dbg
+              ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL)
+              : gl.getParameter(gl.VENDOR),
+            renderer: dbg
+              ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+              : gl.getParameter(gl.RENDERER),
+          };
+        } catch (e) {
+          return { vendor: "读取失败", renderer: "读取失败" };
+        }
+      }
+
+      function getCanvasDataUrlSample() {
+        try {
+          const c = document.createElement("canvas");
+          c.width = 220;
+          c.height = 48;
+          const ctx = c.getContext("2d");
+          ctx.textBaseline = "top";
+          ctx.font = "14px Arial";
+          ctx.fillStyle = "#f60";
+          ctx.fillRect(120, 1, 60, 22);
+          ctx.fillStyle = "#069";
+          ctx.fillText("Canvas 指纹", 2, 14);
+          ctx.fillStyle = "rgba(102, 204, 0, 0.65)";
+          ctx.fillText("Canvas 指纹", 4, 16);
+          return c.toDataURL();
+        } catch (e) {
+          return "";
+        }
+      }
+
+      function buildPayload(captureIso) {
+        const nav = navigator;
+        const scr = screen;
+        const webgl = getWebGLInfo();
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+        return {
+          captureAt: captureIso,
+          userAgent: nav.userAgent,
+          platform: nav.platform || "",
+          languages: (nav.languages || [nav.language]).join(","),
+          hardwareConcurrency: nav.hardwareConcurrency,
+          deviceMemory: nav.deviceMemory,
+          maxTouchPoints: nav.maxTouchPoints,
+          screen: [
+            scr.width,
+            scr.height,
+            scr.availWidth,
+            scr.availHeight,
+            scr.colorDepth,
+            window.devicePixelRatio,
+          ].join(","),
+          timezone: tz,
+          tzOffsetMin: -new Date().getTimezoneOffset(),
+          cookieEnabled:
+            location.protocol === "file:" ? null : nav.cookieEnabled,
+          webglVendor: webgl.vendor,
+          webglRenderer: webgl.renderer,
+          canvasDataUrl: getCanvasDataUrlSample(),
+        };
+      }
+
+      async function computeFingerprintString() {
+        const captureIso = new Date().toISOString();
+        const payload = buildPayload(captureIso);
+        const keys = Object.keys(payload).sort();
+        const canonical = JSON.stringify(payload, keys);
+        return sha256Hex(canonical);
+      }
+
+      document.querySelector("#btn").addEventListener("click", function () {
+        computeFingerprintString().then(function (fp) {
+          html2canvas(document.body, {
+            useCORS: true,
+            scale: window.devicePixelRatio || 1,
+            onclone: function (clonedDoc) {
+              const pre = clonedDoc.createElement("pre");
+              pre.textContent = fp;
+              pre.setAttribute("data-fingerprint", "");
+              Object.assign(pre.style, {
+                display: "block",
+                boxSizing: "border-box",
+                margin: "12px 0 0",
+                padding: "10px 12px",
+                border: "1px solid #333",
+                background: "#fff",
+                color: "#111",
+                font:
+                  '12px ui-monospace, Consolas, "Courier New", monospace',
+                lineHeight: "1.4",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap",
+              });
+              clonedDoc.body.appendChild(pre);
+            },
+          }).then(function (canvas) {
+            const oA = document.createElement("a");
+            oA.href = canvas.toDataURL("image/png");
+            oA.download = "报告.png";
+            oA.click();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
