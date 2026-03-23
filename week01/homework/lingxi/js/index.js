@@ -27,6 +27,7 @@ const PRISM_THEMES = {
 const elements = {
     prismTheme: document.getElementById('prismTheme'),//Prism 代码高亮主题
     themeToggle: document.getElementById('themeToggle'),//主题切换按钮
+    thinkingToggle: document.getElementById('thinkingToggle'),//深度思考模式切换
     welcomeSection: document.getElementById('welcomeSection'),//欢迎界面
     chatSection: document.getElementById('chatSection'),//对话界面
     chatMessages: document.getElementById('chatMessages'),//对话界面的 div
@@ -43,7 +44,10 @@ const elements = {
     thumbnailImage: document.getElementById('thumbnailImage'),//缩略图图片
     thumbnailName: document.getElementById('thumbnailName'),//缩略图文件名
     thumbnailSize: document.getElementById('thumbnailSize'),//缩略图文件大小
-    removeThumbnail: document.getElementById('removeThumbnail')//移除缩略图按钮
+    removeThumbnail: document.getElementById('removeThumbnail'),//移除缩略图按钮
+    // 返回按钮
+    backToWelcomeBtn: document.getElementById('backToWelcomeBtn'),
+    backToChatBtn: document.getElementById('backToChatBtn')
 };
 
 // 发送按钮状态
@@ -54,12 +58,18 @@ let isSendBtnStopping = false;
 function init() {
     // 加载主题
     loadTheme();
-    
+
     // 加载 API 配置
     loadAPIConfig();
-    
+
     // 绑定事件
     bindEvents();
+
+    // 初始化设置模态框
+    initSettingsModal();
+
+    // 若有 localStorage 中的对话历史，恢复并更新返回按钮可见性
+    updateBackButtonVisibility();
 }
 
 // ==================== 主题相关 ====================
@@ -191,6 +201,15 @@ function bindEvents() {
             sendMessage();
         });
     });
+
+    // 粘贴图片功能
+    elements.messageInput.addEventListener('paste', handlePaste);
+
+    // 返回首页
+    elements.backToWelcomeBtn.addEventListener('click', goToWelcome);
+
+    // 返回对话
+    elements.backToChatBtn.addEventListener('click', goToChat);
 }
 
 // ==================== 输入处理 ====================
@@ -210,12 +229,61 @@ function handleKeyPress(e) {
     }
 }
 
+// 处理粘贴图片
+function handlePaste(e) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+            e.preventDefault();
+            const file = items[i].getAsFile();
+            if (file) {
+                processImageFile(file);
+            }
+            break;
+        }
+    }
+}
+
+// 处理图片文件
+function processImageFile(file) {
+    // 检查文件大小
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+        alert('图片大小不能超过 10MB！');
+        return;
+    }
+
+    currentImageFile = file;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentImageBase64 = e.target.result;
+        showThumbnail(file, currentImageBase64);
+    };
+    reader.readAsDataURL(file);
+}
+
 // ==================== 消息处理 ====================
 
 function sendMessage() {
-    // 如果发送按钮当前是停止状态，不执行发送操作
-    if (isSendBtnStopping) return;
-    
+    // 如果发送按钮当前是停止状态，执行停止操作
+    if (isSendBtnStopping) {
+        if (abortController) {
+            abortController.abort();
+            isStreaming = false;
+            // 恢复发送按钮
+            restoreSendButton();
+            // 只移除 AI 消息，保留用户消息
+            const messages = elements.chatMessages.children;
+            if (messages.length >= 1) {
+                elements.chatMessages.removeChild(messages[messages.length - 1]);
+            }
+        }
+        return;
+    }
+
     const message = elements.messageInput.value.trim();
     const hasImage = currentImageBase64 !== null;
     
@@ -239,8 +307,7 @@ function sendMessage() {
     }
     
     // 隐藏欢迎页面，显示对话页面
-    elements.welcomeSection.style.display = 'none';
-    elements.chatSection.style.display = 'flex';
+    goToChat();
     
     // 滚动到底部
     scrollToBottom();
@@ -255,7 +322,7 @@ function addMessage(type, content, imageBase64 = null) {
     
     if (type === 'ai') {
         messageDiv.innerHTML = `
-            <div class="message-avatar">灵</div>
+            <div class="message-avatar"><img src="assets/灵犀.svg" alt="灵犀"></div>
             <div class="message-content">
                 <div class="reasoning-content"></div>
                 <div class="actual-content">${content}</div>
@@ -275,7 +342,7 @@ function addMessage(type, content, imageBase64 = null) {
                 ${imageHtml}
                 ${contentHtml}
             </div>
-            <div class="message-avatar">我</div>
+            <div class="message-avatar"><img src="assets/用户.png" alt="用户"></div>
         `;
     }
     
@@ -303,25 +370,6 @@ function sendToAI(message, imageBase64 = null) {
     elements.sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
     elements.sendBtn.disabled = false;
     isSendBtnStopping = true;
-    
-    // 保存原始发送按钮点击事件
-    const originalSendBtnClick = elements.sendBtn.onclick;
-    
-    // 添加停止功能
-    elements.sendBtn.onclick = () => {
-        if (abortController) {
-            abortController.abort();
-            isStreaming = false;
-            // 恢复发送按钮
-            restoreSendButton();
-            // 只移除 AI 消息，保留用户消息
-            const messages = elements.chatMessages.children;
-            if (messages.length >= 1) {
-                // 只移除最后一条消息（AI 消息）
-                elements.chatMessages.removeChild(messages[messages.length - 1]);
-            }
-        }
-    };
     
     // 获取对话历史
     const chatHistory = getChatHistory();
@@ -386,7 +434,9 @@ function sendToAI(message, imageBase64 = null) {
         body: JSON.stringify({
             model: MODEL_NAME,
             messages: messages,
-            stream: true
+            stream: true,
+            enable_thinking: elements.thinkingToggle.checked,
+            stream_options: { include_usage: true }
         }),
         signal: abortController.signal
     })
@@ -441,20 +491,30 @@ function sendToAI(message, imageBase64 = null) {
                         const event = JSON.parse(data);
                         if (event.choices && event.choices[0]) {
                             const choice = event.choices[0];
-                            
+
                             // 处理思考过程
                             if (choice.delta && choice.delta.reasoning_content) {
                                 currentReasoning += choice.delta.reasoning_content;
                                 hasReasoningUpdate = true;
                                 isFirstChunk = false;
                             }
-                            
+
                             // 处理实际内容
                             if (choice.delta && choice.delta.content) {
                                 aiResponse += choice.delta.content;
                                 hasContentUpdate = true;
                                 isFirstChunk = false;
                             }
+                        }
+
+                        // 处理 token 使用量（最后一个块）
+                        if (event.choices && event.choices.length === 0 && event.usage) {
+                            const usage = event.usage;
+                            const cached = usage.prompt_tokens_details?.cached_tokens || 0;
+                            const usageDiv = document.createElement('div');
+                            usageDiv.className = 'token-usage';
+                            usageDiv.textContent = `📊 ${usage.total_tokens} tokens (输入: ${usage.prompt_tokens} | 输出: ${usage.completion_tokens}${cached > 0 ? ' | 缓存: ' + cached : ''})`;
+                            aiMessageDiv.querySelector('.message-content').appendChild(usageDiv);
                         }
                     } catch (e) {
                         console.error('解析响应失败:', e);
@@ -583,6 +643,50 @@ function addCopyButtons(messageDiv) {
     });
 }
 
+// ==================== Settings Modal ====================
+
+function initSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveBtn = document.getElementById('saveApiKey');
+    const cancelBtn = document.getElementById('cancelSettings');
+    const overlay = modal.querySelector('.modal-overlay');
+
+    // Open modal
+    settingsBtn.addEventListener('click', () => {
+        const currentKey = localStorage.getItem('LINGXI_API_KEY') || API_KEY;
+        if (currentKey && currentKey.length > 10) {
+            apiKeyInput.placeholder = `当前: ${currentKey.substring(0, 6)}...${currentKey.slice(-4)}`;
+        }
+        modal.classList.add('show');
+    });
+
+    // Save API key
+    saveBtn.addEventListener('click', () => {
+        const newKey = apiKeyInput.value.trim();
+        if (newKey) {
+            localStorage.setItem('LINGXI_API_KEY', newKey);
+            API_KEY = newKey;
+            alert('API Key 已保存');
+            apiKeyInput.value = '';
+            modal.classList.remove('show');
+        }
+    });
+
+    // Cancel
+    cancelBtn.addEventListener('click', () => {
+        apiKeyInput.value = '';
+        modal.classList.remove('show');
+    });
+
+    // Close on overlay click
+    overlay.addEventListener('click', () => {
+        apiKeyInput.value = '';
+        modal.classList.remove('show');
+    });
+}
+
 // ==================== 图片上传 ====================
 
 function handleFileUpload(e) {
@@ -658,6 +762,73 @@ function formatFileSize(bytes) {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + sizes[i];
 }
 
+// ==================== 视图切换（返回功能）====================
+
+function goToWelcome() {
+    elements.welcomeSection.style.display = 'flex';
+    elements.chatSection.style.display = 'none';
+    updateBackButtonVisibility();
+}
+
+function goToChat() {
+    // 若对话区为空且有历史，从 localStorage 恢复文本对话
+    if (elements.chatMessages.children.length === 0) {
+        restoreChatFromHistory();
+    }
+    elements.welcomeSection.style.display = 'none';
+    elements.chatSection.style.display = 'flex';
+    updateBackButtonVisibility();
+    scrollToBottom();
+}
+
+function restoreChatFromHistory() {
+    const history = getChatHistory();
+    if (!history || history.length === 0) return;
+
+    history.forEach(item => {
+        const content = typeof item.content === 'string' ? item.content : '';
+        if (!content.trim()) return;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${item.role}-message`;
+
+        if (item.role === 'user') {
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="message-text">${escapeHtml(content)}</div>
+                </div>
+                <div class="message-avatar"><img src="assets/用户.png" alt="用户"></div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="message-avatar"><img src="assets/灵犀.svg" alt="灵犀"></div>
+                <div class="message-content">
+                    <div class="reasoning-content"></div>
+                    <div class="actual-content">${renderMarkdown(content)}</div>
+                </div>
+            `;
+            addCopyButtons(messageDiv);
+        }
+        elements.chatMessages.appendChild(messageDiv);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function updateBackButtonVisibility() {
+    const hasHistory = getChatHistory().length > 0;
+    const hasMessages = elements.chatMessages.children.length > 0;
+    const showBackToChat = hasHistory || hasMessages;
+
+    if (elements.backToChatBtn) {
+        elements.backToChatBtn.style.display = showBackToChat ? 'flex' : 'none';
+    }
+}
+
 // ==================== 对话管理 ====================
 
 function getChatHistory() {
@@ -689,13 +860,13 @@ function addToChatHistory(role, content) {
 function clearChat() {
     if (confirm('确定要清除所有对话吗？')) {
         elements.chatMessages.innerHTML = '';
-        elements.welcomeSection.style.display = 'flex';
-        elements.chatSection.style.display = 'none';
+        goToWelcome();
         try {
             localStorage.removeItem('lingxi_chat_history');
         } catch (e) {
             console.warn('无法清除对话历史:', e);
         }
+        updateBackButtonVisibility();
     }
 }
 
