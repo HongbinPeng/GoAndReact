@@ -23,6 +23,10 @@
     <div class="container">
         <!-- 欢迎页面 -->
         <div class="welcome-section" id="welcomeSection">
+            <button class="back-btn back-to-chat" id="backToChatBtn" title="返回对话" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span>返回对话</span>
+            </button>
             <h1 class="welcome-title">
                 <span class="gradient-text">灵犀</span>
             </h1>
@@ -52,7 +56,12 @@
         <!-- 对话界面 -->
         <div class="chat-section" id="chatSection">
             <div class="chat-header">
+                <button class="back-btn back-to-welcome" id="backToWelcomeBtn" title="返回首页">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    <span>返回首页</span>
+                </button>
                 <h2>对话</h2>
+                <button id="settingsBtn" class="settings-btn">设置APIKey</button>
             </div>
             <div class="chat-messages" id="chatMessages"></div>
         </div>
@@ -96,6 +105,11 @@
                         </button>
                     </div>
                 </div>
+                <label class="thinking-toggle" title="深度思考模式">
+                    <input type="checkbox" id="thinkingToggle">
+                    <span class="slider"></span>
+                    <span class="toggle-text">深度思考模式</span>
+                </label>
                 <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -120,6 +134,20 @@
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <img id="previewImage" src="" alt="预览图片">
+        </div>
+    </div>
+
+    <!-- API Key 设置模态框 -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-box">
+            <h3>API Key 设置</h3>
+            <label for="apiKeyInput">LINGXI_API_KEY:</label>
+            <input type="password" id="apiKeyInput" placeholder="输入你的 API Key">
+            <div class="modal-buttons">
+                <button id="saveApiKey" class="btn-primary">保存</button>
+                <button id="cancelSettings" class="btn-secondary">取消</button>
+            </div>
         </div>
     </div>
 </body>
