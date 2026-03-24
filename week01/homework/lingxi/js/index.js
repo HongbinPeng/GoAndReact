@@ -123,8 +123,8 @@ function loadAPIConfig() {
     // 尝试从 localStorage 加载
     try {
         API_KEY = localStorage.getItem('LINGXI_API_KEY') || '';
-        BASE_URL = localStorage.getItem('EMB_BASE_URL') || '';
-        MODEL_NAME = localStorage.getItem('EMB_MODEL_NAME') || '';
+        BASE_URL = localStorage.getItem('BASE_URL') || '';
+        MODEL_NAME = localStorage.getItem('MODEL_NAME') || '';
     } catch (e) {
         console.warn('无法从 localStorage 加载 API 配置:', e);
         API_KEY = '';
@@ -142,8 +142,8 @@ function loadAPIConfig() {
         // 保存到 localStorage
         try {
             localStorage.setItem('LINGXI_API_KEY', API_KEY);
-            localStorage.setItem('EMB_BASE_URL', BASE_URL);
-            localStorage.setItem('EMB_MODEL_NAME', MODEL_NAME);
+            localStorage.setItem('BASE_URL', BASE_URL);
+            localStorage.setItem('MODEL_NAME', MODEL_NAME);
         } catch (e) {
             console.warn('无法保存 API 配置到 localStorage:', e);
         }
@@ -155,8 +155,8 @@ function setAPIConfig(key, baseURL, modelName) {
     BASE_URL = baseURL;
     MODEL_NAME = modelName;
     localStorage.setItem('LINGXI_API_KEY', key);
-    localStorage.setItem('EMB_BASE_URL', baseURL);
-    localStorage.setItem('EMB_MODEL_NAME', modelName);
+    localStorage.setItem('BASE_URL', baseURL);
+    localStorage.setItem('MODEL_NAME', modelName);
 }
 
 // ==================== 事件绑定 ====================
@@ -225,6 +225,9 @@ function handleKeyPress(e) {
     // Enter 发送消息，Shift+Enter 换行
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        // 流式生成中不允许用 Enter 触发“停止/打断”
+        // （停止仅通过点击发送按钮的“停止态”完成）
+        if (isStreaming || isSendBtnStopping) return;
         sendMessage();
     }
 }
@@ -268,6 +271,12 @@ function processImageFile(file) {
 // ==================== 消息处理 ====================
 
 function sendMessage() {
+    // 如果正在流式生成中，忽略新的发送请求
+    if (isStreaming || isSendBtnStopping) {
+        console.warn('AI 正在回答中，请等待当前回答完成后再发送新消息');
+        return;
+    }
+    
     // 如果发送按钮当前是停止状态，执行停止操作
     if (isSendBtnStopping) {
         if (abortController) {
