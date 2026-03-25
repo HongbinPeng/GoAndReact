@@ -18,6 +18,12 @@ const MAX_HISTORY = 4;
 // 图片相关
 let currentImageBase64 = null; // 当前上传图片的 Base64 编码
 let currentImageFile = null; // 当前图片文件对象
+// 模型参数相关
+let modelParams = {
+    temperature: 1,
+    top_p: 0.9,
+    top_k: 50
+};
 const PRISM_THEMES = {
     light: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css',
     dark: 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css'
@@ -47,7 +53,17 @@ const elements = {
     removeThumbnail: document.getElementById('removeThumbnail'),//移除缩略图按钮
     // 返回按钮
     backToWelcomeBtn: document.getElementById('backToWelcomeBtn'),
-    backToChatBtn: document.getElementById('backToChatBtn')
+    backToChatBtn: document.getElementById('backToChatBtn'),
+    // 模型参数设置相关
+    modelParamsBtn: document.getElementById('modelParamsBtn'),
+    modelParamsModal: document.getElementById('modelParamsModal'),
+    temperatureInput: document.getElementById('temperatureInput'),
+    topPInput: document.getElementById('topPInput'),
+    topKInput: document.getElementById('topKInput'),
+    temperatureValue: document.getElementById('temperatureValue'),
+    topPValue: document.getElementById('topPValue'),
+    topKValue: document.getElementById('topKValue'),
+    searchToggle: document.getElementById('searchToggle')
 };
 
 // 发送按钮状态
@@ -61,12 +77,18 @@ function init() {
 
     // 加载 API 配置
     loadAPIConfig();
+    
+    // 加载模型参数
+    loadModelParams();
 
     // 绑定事件
     bindEvents();
 
     // 初始化设置模态框
     initSettingsModal();
+    
+    // 初始化模型参数模态框
+    initModelParamsModal();
 
     // 若有 localStorage 中的对话历史，恢复并更新返回按钮可见性
     updateBackButtonVisibility();
@@ -159,6 +181,50 @@ function setAPIConfig(key, baseURL, modelName) {
     localStorage.setItem('MODEL_NAME', modelName);
 }
 
+// ==================== 模型参数管理 ====================
+
+function loadModelParams() {
+    try {
+        const savedParams = localStorage.getItem('model_params');
+        if (savedParams) {
+            const params = JSON.parse(savedParams);
+            modelParams = {
+                temperature: params.temperature || 1,
+                top_p: params.top_p || 0.9,
+                top_k: params.top_k || 50
+            };
+        }
+    } catch (e) {
+        console.warn('无法加载模型参数:', e);
+    }
+    
+    // 加载联网搜索设置
+    try {
+        const enableSearch = localStorage.getItem('enable_search');
+        if (enableSearch) {
+            elements.searchToggle.checked = enableSearch === 'true';
+        }
+    } catch (e) {
+        console.warn('无法加载联网搜索设置:', e);
+    }
+}
+
+function saveModelParams() {
+    try {
+        localStorage.setItem('model_params', JSON.stringify(modelParams));
+    } catch (e) {
+        console.warn('无法保存模型参数:', e);
+    }
+}
+
+function saveSearchToggle() {
+    try {
+        localStorage.setItem('enable_search', elements.searchToggle.checked);
+    } catch (e) {
+        console.warn('无法保存联网搜索设置:', e);
+    }
+}
+
 // ==================== 事件绑定 ====================
 
 function bindEvents() {
@@ -210,6 +276,67 @@ function bindEvents() {
 
     // 返回对话
     elements.backToChatBtn.addEventListener('click', goToChat);
+    
+    // 模型参数设置按钮
+    elements.modelParamsBtn.addEventListener('click', () => {
+        elements.modelParamsModal.classList.add('show');
+    });
+    
+    // 模型参数模态框关闭
+    const cancelModelParams = document.getElementById('cancelModelParams');
+    if (cancelModelParams) {
+        cancelModelParams.addEventListener('click', () => {
+            elements.modelParamsModal.classList.remove('show');
+        });
+    }
+    
+    const modelParamsOverlay = elements.modelParamsModal.querySelector('.modal-overlay');
+    if (modelParamsOverlay) {
+        modelParamsOverlay.addEventListener('click', () => {
+            elements.modelParamsModal.classList.remove('show');
+        });
+    }
+    
+    // 保存模型参数
+    const saveModelParamsBtn = document.getElementById('saveModelParams');
+    if (saveModelParamsBtn) {
+        saveModelParamsBtn.addEventListener('click', () => {
+            modelParams.temperature = parseFloat(elements.temperatureInput.value);
+            modelParams.top_p = parseFloat(elements.topPInput.value);
+            modelParams.top_k = parseInt(elements.topKInput.value);
+            saveModelParams();
+            elements.modelParamsModal.classList.remove('show');
+        });
+    }
+    
+    // 重置模型参数
+    const resetModelParamsBtn = document.getElementById('resetModelParams');
+    if (resetModelParamsBtn) {
+        resetModelParamsBtn.addEventListener('click', () => {
+            elements.temperatureInput.value = 1;
+            elements.topPInput.value = 0.9;
+            elements.topKInput.value = 50;
+            elements.temperatureValue.textContent = '1.0';
+            elements.topPValue.textContent = '0.9';
+            elements.topKValue.textContent = '50';
+        });
+    }
+    
+    // 参数滑块实时更新显示值
+    elements.temperatureInput.addEventListener('input', (e) => {
+        elements.temperatureValue.textContent = parseFloat(e.target.value).toFixed(1);
+    });
+    
+    elements.topPInput.addEventListener('input', (e) => {
+        elements.topPValue.textContent = parseFloat(e.target.value).toFixed(2);
+    });
+    
+    elements.topKInput.addEventListener('input', (e) => {
+        elements.topKValue.textContent = e.target.value;
+    });
+    
+    // 联网搜索开关
+    elements.searchToggle.addEventListener('change', saveSearchToggle);
 }
 
 // ==================== 输入处理 ====================
@@ -271,12 +398,6 @@ function processImageFile(file) {
 // ==================== 消息处理 ====================
 
 function sendMessage() {
-    // 如果正在流式生成中，忽略新的发送请求
-    if (isStreaming || isSendBtnStopping) {
-        console.warn('AI 正在回答中，请等待当前回答完成后再发送新消息');
-        return;
-    }
-    
     // 如果发送按钮当前是停止状态，执行停止操作
     if (isSendBtnStopping) {
         if (abortController) {
@@ -290,6 +411,12 @@ function sendMessage() {
                 elements.chatMessages.removeChild(messages[messages.length - 1]);
             }
         }
+        return;
+    }
+    
+    // 如果正在流式生成中（通过 Enter 键触发时），忽略新的发送请求
+    if (isStreaming) {
+        console.warn('AI 正在回答中，请等待当前回答完成后再发送新消息');
         return;
     }
 
@@ -362,11 +489,7 @@ function addMessage(type, content, imageBase64 = null) {
 }
 
 function sendToAI(message, imageBase64 = null) {
-    if (!API_KEY || !BASE_URL || !MODEL_NAME) {
-        // 如果没有 API 配置，使用模拟响应
-        simulateAIResponse(message);
-        return;
-    }
+
     
     // 显示 AI 正在输入
     const aiMessageDiv = addMessage('ai', '<span class="typing">正在思考...</span>');
@@ -375,15 +498,14 @@ function sendToAI(message, imageBase64 = null) {
     abortController = new AbortController();
     isStreaming = true;
     
-    // 更改发送按钮为停止按钮
+  
     elements.sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
     elements.sendBtn.disabled = false;
     isSendBtnStopping = true;
     
-    // 获取对话历史
+ 
     const chatHistory = getChatHistory();
     
-    // 构建消息数组
     const messages = [
         {
             role: 'system',
@@ -391,15 +513,13 @@ function sendToAI(message, imageBase64 = null) {
         }
     ];
     
-    // 添加对话历史作为上下文
     chatHistory.forEach(item => {
         messages.push(item);
     });
     
-    // 构建当前用户消息内容（支持多模态）
     let userMessageContent;
     if (imageBase64) {
-        // 包含图片的多模态消息
+
         userMessageContent = [
             {
                 type: 'image_url',
@@ -409,14 +529,14 @@ function sendToAI(message, imageBase64 = null) {
             }
         ];
         
-        // 如果有文本，也添加到内容中
+
         if (message && message.trim()) {
             userMessageContent.unshift({
                 type: 'text',
                 text: message
             });
         } else {
-            // 如果只有图片没有文本，添加一个默认的文本提示
+           
             userMessageContent.push({
                 type: 'text',
                 text: '请分析这张图片。'
@@ -445,6 +565,12 @@ function sendToAI(message, imageBase64 = null) {
             messages: messages,
             stream: true,
             enable_thinking: elements.thinkingToggle.checked,
+            enable_search: elements.searchToggle.checked,
+            temperature: modelParams.temperature,
+            top_p: modelParams.top_p,
+            extra_body: {
+                top_k: modelParams.top_k
+            },
             stream_options: { include_usage: true }
         }),
         signal: abortController.signal
@@ -462,17 +588,17 @@ function sendToAI(message, imageBase64 = null) {
         function processChunk({ done, value }) {
             if (done) {
                 isStreaming = false;
-                // 恢复发送按钮
+                
                 restoreSendButton();
-                // 显示最终回答
+                
                 aiMessageDiv.querySelector('.actual-content').innerHTML = renderMarkdown(aiResponse);
-                // 确保思考过程可见
+                
                 const reasoningContent = aiMessageDiv.querySelector('.reasoning-content');
                 if (reasoningContent.textContent.trim()) {
                     reasoningContent.classList.add('has-content');
                 }
                 addCopyButtons(aiMessageDiv);
-                // 将用户消息和 AI 响应添加到对话历史
+                
                 addToChatHistory('user', message);
                 addToChatHistory('assistant', aiResponse);
                 return;
@@ -694,6 +820,23 @@ function initSettingsModal() {
         apiKeyInput.value = '';
         modal.classList.remove('show');
     });
+}
+
+// 初始化模型参数模态框
+function initModelParamsModal() {
+    // 设置初始值
+    if (elements.temperatureInput) {
+        elements.temperatureInput.value = modelParams.temperature;
+        elements.temperatureValue.textContent = modelParams.temperature.toFixed(1);
+    }
+    if (elements.topPInput) {
+        elements.topPInput.value = modelParams.top_p;
+        elements.topPValue.textContent = modelParams.top_p.toFixed(2);
+    }
+    if (elements.topKInput) {
+        elements.topKInput.value = modelParams.top_k;
+        elements.topKValue.textContent = modelParams.top_k.toString();
+    }
 }
 
 // ==================== 图片上传 ====================
