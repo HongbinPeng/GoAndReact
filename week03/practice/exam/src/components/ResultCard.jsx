@@ -18,7 +18,7 @@ function tierHint(ratePercent, isPassed) {
   return ''
 }
 
-/** 与需求一致：正确率 strictly > 60% 视为通过 */
+/** 正确率 strictly > 60% 视为通过 */
 export default function ResultCard({
   correctCount,
   totalQuestions,
