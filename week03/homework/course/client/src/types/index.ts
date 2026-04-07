@@ -52,3 +52,17 @@ export interface PaginationData<T> {
   page: number
   pageSize: number
 }
+
+export interface AiChatTraceItem {
+  step: string
+  detail: string
+  sql: string | null
+  at: string
+}
+
+export interface AiChatData {
+  sessionId: string
+  question: string
+  answer: string
+  trace: AiChatTraceItem[]
+}

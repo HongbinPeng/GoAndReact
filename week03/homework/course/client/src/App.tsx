@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage'
 import CoursesPage from './pages/CoursesPage'
 import StudentsPage from './pages/StudentsPage'
 import SummaryPage from './pages/SummaryPage'
+import AiChatPage from './pages/AiChatPage'
 import LoginPage from './pages/LoginPage'
 import { getToken } from './utils/auth'
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="courses" element={<CoursesPage />} />
           <Route path="students" element={<StudentsPage />} />
           <Route path="summary" element={<SummaryPage />} />
+          <Route path="ai-chat" element={<AiChatPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

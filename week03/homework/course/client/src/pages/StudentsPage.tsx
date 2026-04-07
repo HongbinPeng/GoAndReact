@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag } from 'antd'
+import { Button, Card, Checkbox, Col, Form, Input, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import type { Course, Student } from '../types'
@@ -38,12 +38,17 @@ export default function StudentsPage() {
   }, [])
 
   return (
-    <Card title="学生管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>新增学生</Button>}>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <Input.Search placeholder="姓名/学号" allowClear onSearch={(keyword) => setQuery((q) => ({ ...q, page: 1, keyword }))} />
-        <Select placeholder="班级" allowClear style={{ width: 180 }} onChange={(className) => setQuery((q) => ({ ...q, page: 1, className: className || '' }))}
+    <div className="page-wrap">
+      <div className="page-head">
+        <Typography.Title level={4}>学生管理</Typography.Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>新增学生</Button>
+      </div>
+      <Card className="panel-card">
+      <Space className="filter-bar" wrap>
+        <Input.Search placeholder="请输入姓名/学号" allowClear onSearch={(keyword) => setQuery((q) => ({ ...q, page: 1, keyword }))} />
+        <Select placeholder="班级筛选" allowClear style={{ width: 180 }} onChange={(className) => setQuery((q) => ({ ...q, page: 1, className: className || '' }))}
           options={classes.map((c) => ({ value: c, label: c }))} />
-        <Select placeholder="状态" allowClear style={{ width: 130 }} onChange={(status) => setQuery((q) => ({ ...q, page: 1, status: status || '' }))}
+        <Select placeholder="学生状态" allowClear style={{ width: 130 }} onChange={(status) => setQuery((q) => ({ ...q, page: 1, status: status || '' }))}
           options={[{ value: 'active', label: '活跃' }, { value: 'inactive', label: '非活跃' }]} />
       </Space>
       <Table<Student>
@@ -56,9 +61,15 @@ export default function StudentsPage() {
           { title: '姓名', dataIndex: 'name' },
           { title: '学号', dataIndex: 'student_no' },
           { title: '班级', dataIndex: 'class_name' },
-          { title: '联系方式', dataIndex: 'phone' },
+          { title: '联系方式', render: (_, record) => <div>{record.phone}<br />{record.email}</div> },
           { title: '状态', dataIndex: 'status', render: (v: Student['status']) => <Tag color={v === 'active' ? 'green' : 'default'}>{v === 'active' ? '活跃' : '非活跃'}</Tag> },
-          { title: '选课数', render: (_, record) => record.course_ids.length },
+          {
+            title: '已选课程',
+            render: (_, record) => {
+              const text = courses.filter((c) => record.course_ids.includes(c.id)).map((c) => c.name).join('、')
+              return <span>{text || '-'}</span>
+            },
+          },
           {
             title: '操作',
             render: (_, record) => (
@@ -80,6 +91,7 @@ export default function StudentsPage() {
             ),
           },
         ]}
+      className="data-table"
       />
 
       <Modal
@@ -98,20 +110,20 @@ export default function StudentsPage() {
         }}
       >
         <Form form={form} layout="vertical" initialValues={{ status: 'active', course_ids: [] }}>
-          <Form.Item label="姓名" name="name" rules={[{ required: true, message: '请输入姓名' }]}><Input /></Form.Item>
-          <Form.Item label="学号" name="student_no" rules={[{ required: true, message: '请输入学号' }]}><Input /></Form.Item>
-          <Form.Item label="班级" name="class_name"><Input /></Form.Item>
-          <Form.Item label="电话" name="phone"><Input /></Form.Item>
-          <Form.Item label="邮箱" name="email"><Input /></Form.Item>
-          <Form.Item label="状态" name="status"><Select options={[{ value: 'active', label: '活跃' }, { value: 'inactive', label: '非活跃' }]} /></Form.Item>
+          <Row gutter={12}>
+            <Col span={12}><Form.Item label="姓名" name="name" rules={[{ required: true, message: '请输入姓名' }]}><Input /></Form.Item></Col>
+            <Col span={12}><Form.Item label="学号" name="student_no" rules={[{ required: true, message: '请输入学号' }]}><Input /></Form.Item></Col>
+            <Col span={12}><Form.Item label="班级" name="class_name"><Input /></Form.Item></Col>
+            <Col span={12}><Form.Item label="状态" name="status"><Select options={[{ value: 'active', label: '活跃' }, { value: 'inactive', label: '非活跃' }]} /></Form.Item></Col>
+            <Col span={12}><Form.Item label="手机号" name="phone"><Input /></Form.Item></Col>
+            <Col span={12}><Form.Item label="邮箱" name="email"><Input /></Form.Item></Col>
+          </Row>
           <Form.Item label="课程" name="course_ids">
-            <Select
-              mode="multiple"
-              options={courses.map((course) => ({ value: course.id, label: course.name }))}
-            />
+            <Checkbox.Group className="course-check-grid" options={courses.map((course) => ({ value: course.id, label: course.name }))} />
           </Form.Item>
         </Form>
       </Modal>
-    </Card>
+      </Card>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Card, Col, Empty, Row, Statistic } from 'antd'
+import { Card, Col, Empty, Row, Typography } from 'antd'
 import ReactECharts from 'echarts-for-react'
 import { useEffect, useState } from 'react'
 import { api } from '../api'
@@ -17,29 +17,32 @@ export default function DashboardPage() {
   const activeRate = data.stats.totalStudents ? Math.round((data.stats.activeStudents / data.stats.totalStudents) * 100) : 0
 
   return (
-    <>
+    <div className="page-wrap">
+      <div className="page-head">
+        <Typography.Title level={4}>工作台</Typography.Title>
+      </div>
       <Row gutter={16}>
-        <Col span={6}><Card><Statistic title="课程总数" value={data.stats.totalCourses} /></Card></Col>
-        <Col span={6}><Card><Statistic title="学生总数" value={data.stats.totalStudents} /></Card></Col>
-        <Col span={6}><Card><Statistic title="发布率" value={publishRate} suffix="%" /></Card></Col>
-        <Col span={6}><Card><Statistic title="活跃率" value={activeRate} suffix="%" /></Card></Col>
+        <Col span={6}><Card className="stat-card"><div className="stat-name">📊 课程总数</div><div className="stat-value">{data.stats.totalCourses}</div><div className="stat-sub">/ 已发布 {data.stats.publishedCourses}</div></Card></Col>
+        <Col span={6}><Card className="stat-card"><div className="stat-name">👥 学生总数</div><div className="stat-value">{data.stats.totalStudents}</div><div className="stat-sub">/ 活跃 {data.stats.activeStudents}</div></Card></Col>
+        <Col span={6}><Card className="stat-card"><div className="stat-name">📈 课程发布率</div><div className="stat-value">{publishRate}%</div><div className="stat-sub">&nbsp;</div></Card></Col>
+        <Col span={6}><Card className="stat-card"><div className="stat-name">🔥 学生活跃率</div><div className="stat-value">{activeRate}%</div><div className="stat-sub">&nbsp;</div></Card></Col>
       </Row>
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={12}>
-          <Card title="课程选课人数排行">
+          <Card title="课程选课人数排行" className="panel-card">
             {data.charts.enrollment.length ? (
-              <ReactECharts option={{
+              <div className="chart-shell"><ReactECharts option={{
                 xAxis: { type: 'category', data: data.charts.enrollment.map((item) => item.name) },
                 yAxis: { type: 'value' },
                 tooltip: {},
                 series: [{ type: 'bar', data: data.charts.enrollment.map((item) => item.value) }],
-              }} />
+              }} /></div>
             ) : <Empty />}
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="近7天学习活跃度">
-            <ReactECharts option={{
+          <Card title="近7天学习活跃度" className="panel-card">
+            <div className="chart-shell"><ReactECharts option={{
               tooltip: { trigger: 'axis' },
               legend: { data: ['学习人数', '学习时长(小时)'] },
               xAxis: { type: 'category', data: data.charts.activity.map((item) => item.label) },
@@ -48,28 +51,28 @@ export default function DashboardPage() {
                 { name: '学习人数', type: 'line', data: data.charts.activity.map((item) => item.students) },
                 { name: '学习时长(小时)', type: 'line', data: data.charts.activity.map((item) => item.duration) },
               ],
-            }} />
+            }} /></div>
           </Card>
         </Col>
       </Row>
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={12}>
-          <Card title="学生状态分布">
-            <ReactECharts option={{
+          <Card title="学生状态分布" className="panel-card">
+            <div className="chart-shell"><ReactECharts option={{
               tooltip: { trigger: 'item' },
               series: [{ type: 'pie', radius: '60%', data: data.charts.statusDist }],
-            }} />
+            }} /></div>
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="课程分类分布">
-            <ReactECharts option={{
+          <Card title="课程分类分布" className="panel-card">
+            <div className="chart-shell"><ReactECharts option={{
               tooltip: { trigger: 'item' },
               series: [{ type: 'pie', radius: '60%', data: data.charts.categoryDist }],
-            }} />
+            }} /></div>
           </Card>
         </Col>
       </Row>
-    </>
+    </div>
   )
 }

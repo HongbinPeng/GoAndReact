@@ -12,6 +12,7 @@ import courseRoutes from './routes/courses.js';
 import studentRoutes from './routes/students.js';
 import summaryRoutes from './routes/summary.js';
 import staticRoutes from './routes/static.js';
+import aiRoutes from './routes/ai.js';
 
 const app = new Koa();
 const router = new Router();
@@ -41,6 +42,7 @@ router.use('/api/courses', courseRoutes.routes());
 router.use('/api/students', studentRoutes.routes());
 router.use('/api/summary', summaryRoutes.routes());
 router.use('/api/static', staticRoutes.routes());
+router.use('/api/ai', aiRoutes.routes());
 
 app.use(async (ctx, next) => {
   if (ctx.path.startsWith('/api')) {

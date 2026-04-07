@@ -254,7 +254,7 @@ elements.temperatureInput.addEventListener('input', (e) => {
 
 #### 用户界面
 
-!\[模型参数设置界面]\(./image.png null)
+![模型参数设置界面](./image.png)
 
 ### 3.5 请求中断机制
 

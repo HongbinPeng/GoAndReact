@@ -1,4 +1,4 @@
-import { Card } from 'antd'
+import { Card, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
@@ -13,7 +13,11 @@ export default function SummaryPage() {
   }, [])
 
   return (
-    <Card title="学习总结">
+    <div className="page-wrap">
+      <div className="page-head">
+        <Typography.Title level={4}>学习总结</Typography.Title>
+      </div>
+      <Card className="panel-card">
       <div className="markdown-body">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -30,6 +34,7 @@ export default function SummaryPage() {
           {content}
         </ReactMarkdown>
       </div>
-    </Card>
+      </Card>
+    </div>
   )
 }

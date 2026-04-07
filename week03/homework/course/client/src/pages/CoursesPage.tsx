@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, Modal, Popconfirm, Select, Space, Switch, Table, Tag } from 'antd'
+import { Button, Card, Col, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Switch, Table, Tag, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import type { Course } from '../types'
@@ -37,12 +37,17 @@ export default function CoursesPage() {
   }, [])
 
   return (
-    <Card title="课程管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>新增课程</Button>}>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <Input.Search placeholder="课程名/讲师" allowClear onSearch={(keyword) => setQuery((q) => ({ ...q, page: 1, keyword }))} />
-        <Select placeholder="状态" allowClear style={{ width: 130 }} onChange={(status) => setQuery((q) => ({ ...q, page: 1, status: status || '' }))}
+    <div className="page-wrap">
+      <div className="page-head">
+        <Typography.Title level={4}>课程管理</Typography.Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>新增课程</Button>
+      </div>
+      <Card className="panel-card">
+      <Space className="filter-bar" wrap>
+        <Input.Search placeholder="请输入课程名称/讲师" allowClear onSearch={(keyword) => setQuery((q) => ({ ...q, page: 1, keyword }))} />
+        <Select placeholder="课程状态" allowClear style={{ width: 140 }} onChange={(status) => setQuery((q) => ({ ...q, page: 1, status: status || '' }))}
           options={[{ value: 'published', label: '已发布' }, { value: 'draft', label: '草稿' }]} />
-        <Select placeholder="分类" allowClear style={{ width: 160 }} onChange={(category) => setQuery((q) => ({ ...q, page: 1, category: category || '' }))}
+        <Select placeholder="课程分类" allowClear style={{ width: 160 }} onChange={(category) => setQuery((q) => ({ ...q, page: 1, category: category || '' }))}
           options={categories.map((c) => ({ value: c, label: c }))} />
       </Space>
       <Table<Course>
@@ -90,6 +95,7 @@ export default function CoursesPage() {
             ),
           },
         ]}
+      className="data-table"
       />
 
       <Modal
@@ -111,11 +117,14 @@ export default function CoursesPage() {
           <Form.Item label="课程名称" name="name" rules={[{ required: true, message: '请输入课程名称' }]}><Input /></Form.Item>
           <Form.Item label="讲师" name="instructor"><Input /></Form.Item>
           <Form.Item label="分类" name="category"><Input /></Form.Item>
-          <Form.Item label="状态" name="status"><Select options={[{ value: 'draft', label: '草稿' }, { value: 'published', label: '已发布' }]} /></Form.Item>
-          <Form.Item label="课时数" name="lesson_count"><Input type="number" /></Form.Item>
+          <Row gutter={12}>
+            <Col span={12}><Form.Item label="课时数" name="lesson_count"><InputNumber style={{ width: '100%' }} min={0} /></Form.Item></Col>
+            <Col span={12}><Form.Item label="状态" name="status"><Select options={[{ value: 'draft', label: '草稿' }, { value: 'published', label: '已发布' }]} /></Form.Item></Col>
+          </Row>
           <Form.Item label="描述" name="description"><Input.TextArea rows={3} /></Form.Item>
         </Form>
       </Modal>
-    </Card>
+      </Card>
+    </div>
   )
 }

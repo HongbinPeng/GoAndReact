@@ -1,5 +1,5 @@
-import { BookOutlined, DashboardOutlined, FileTextOutlined, TeamOutlined, LogoutOutlined } from '@ant-design/icons'
-import { Button, Layout, Menu, Typography } from 'antd'
+import { BookOutlined, DashboardOutlined, DownOutlined, FileTextOutlined, LogoutOutlined, MenuOutlined, RobotOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { Dropdown, Layout, Menu, type MenuProps } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { clearToken } from '../utils/auth'
 
@@ -10,37 +10,49 @@ export default function AppLayout() {
   const location = useLocation()
 
   const selected = location.pathname.split('/')[1] || 'dashboard'
+  const userMenu: MenuProps['items'] = [
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      onClick: () => {
+        clearToken()
+        navigate('/login', { replace: true })
+      },
+    },
+  ]
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider theme="light">
-        <div className="logo">课程管理系统</div>
+    <Layout className="app-shell">
+      <Sider theme="light" width={168} className="app-sider">
+        <div className="logo">🎓 学习管理平台</div>
         <Menu
+          theme="light"
           mode="inline"
           selectedKeys={[selected]}
+          className="side-menu"
           items={[
             { key: 'dashboard', icon: <DashboardOutlined />, label: '工作台' },
             { key: 'courses', icon: <BookOutlined />, label: '课程管理' },
             { key: 'students', icon: <TeamOutlined />, label: '学生管理' },
             { key: 'summary', icon: <FileTextOutlined />, label: '学习总结' },
+            { key: 'ai-chat', icon: <RobotOutlined />, label: 'AI 对话' },
           ]}
           onClick={({ key }) => navigate(`/${key}`)}
         />
       </Sider>
       <Layout>
         <Header className="app-header">
-          <Typography.Text style={{ color: '#fff' }}>欢迎使用课程管理系统</Typography.Text>
-          <Button
-            icon={<LogoutOutlined />}
-            onClick={() => {
-              clearToken()
-              navigate('/login', { replace: true })
-            }}
-          >
-            退出登录
-          </Button>
+          <div className="app-title"><MenuOutlined /></div>
+          <Dropdown menu={{ items: userMenu }} trigger={['click']}>
+            <div className="admin-box">
+              <UserOutlined />
+              <span>管理员</span>
+              <DownOutlined style={{ fontSize: 10 }} />
+            </div>
+          </Dropdown>
         </Header>
-        <Content style={{ padding: 16 }}>
+        <Content className="app-content">
           <Outlet />
         </Content>
       </Layout>
