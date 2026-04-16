@@ -19,6 +19,7 @@ func consummer(ch <-chan int) {
 		time.Sleep(2 * time.Second) // 模拟消费时间
 	}
 }
+
 func main() {
 	ch := make(chan int, 10)
 	go producer(ch)
