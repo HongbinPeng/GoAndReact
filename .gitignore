@@ -48,4 +48,5 @@ yarn-error.log*
 .pnp
 .pnp.js
 .DS_Store
-.claude/
+.vscode/
+.gocache/

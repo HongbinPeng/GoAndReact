@@ -101,17 +101,17 @@ go test ./...
    例如，在用户输入用电量的时候，你需要校验用户输入的数据是否能够变为浮点数，不能就要在函数内部进行错误的处理，具体我使用这个代码解决：
    ```go
    func readUserInput() (float64, string, error) {
-   var usage float64
-   fmt.Print("请输入用电量：")
-   if _, err := fmt.Scanln(&usage); err != nil {
-      return 0, "", fmt.Errorf("读取用电量失败：%w", err)
-   }
-   var timeText string
-   fmt.Print("请输入用电时段（格式 HH:MM）：")
-   if _, err := fmt.Scanln(&timeText); err != nil {
-      return 0, "", fmt.Errorf("读取用电时段失败：%w", err)
-   }
-   return usage, strings.TrimSpace(timeText), nil
+	var usage float64
+	fmt.Print("请输入用电量：")
+	if _, err := fmt.Scanln(&usage); err != nil {
+		return 0, "", fmt.Errorf("读取用电量失败：%w", err)
+	}
+	var timeText string
+	fmt.Print("请输入用电时段（格式 HH:MM）：")
+	if _, err := fmt.Scanln(&timeText); err != nil {
+		return 0, "", fmt.Errorf("读取用电时段失败：%w", err)
+	}
+	return usage, strings.TrimSpace(timeText), nil
    }
    ```
    这样在后续的校验和计算中，就可以直接调用 `readUserInput()` 函数，而不需要重复写校验代码。
