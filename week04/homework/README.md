@@ -71,27 +71,27 @@ go test ./...
 ## 单元测试截图
 **测试时间解析函数的正常与异常场景**
 (1) 测试用例截图
-![测试用例截图](assets/timeTestCase.png)
+![测试用例截图](./billing/assets/timeTestCase.png)
 (2) 单元测试通过截图
-![单元测试通过截图](assets/parseTime.png)
+![单元测试通过截图](./billing/assets/parseTime.png)
 
 **测试阶梯计费函数的正常与异常场景**
 (1) 测试用例截图
-![测试用例截图](assets/tierCostTestCase.png)
+![测试用例截图](./billing/assets/tierCostTestCase.png)
 (2) 单元测试通过截图
-![单元测试通过截图](assets/tierCost.png)
+![单元测试通过截图](./billing/assets/tierCost.png)
 
 **测试最终计费函数的正常与异常场景**
 (1) 测试用例截图
-![测试用例截图](assets/billTestCase.png)
+![测试用例截图](./billing/assets/billTestCase.png)
 (2) 单元测试通过截图
-![单元测试通过截图](assets/bill.png)
+![单元测试通过截图](./billing/assets/bill.png)
 
 **测试账单格式化函数的正常与异常场景**
 (1) 测试用例截图
-![测试用例截图](assets/formatBillTestCase.png)
+![测试用例截图](./billing/assets/formatBillTestCase.png)
 (2) 测试用例截图
-![测试用例截图](assets/formatBill.png)
+![测试用例截图](./billing/assets/formatBill.png)
 
 ## 处理“阶梯计费”时遇到的逻辑难点
 
