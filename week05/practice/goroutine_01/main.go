@@ -11,7 +11,7 @@ func doSquare(origin []int, start int, end int, result chan int, wg *sync.WaitGr
 	var ans int
 	for i := start; i < end; i++ {
 		ans += origin[i] * origin[i]
-		time.Sleep(time.Millisecond * 5)
+		time.Sleep(time.Millisecond * 5) // 模拟计算时间
 	}
 	result <- ans
 }
