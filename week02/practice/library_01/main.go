@@ -17,10 +17,10 @@ type Config struct {
 
 // parseFlags 解析命令行参数
 func parseFlags() Config {
-	file := flag.String("file", "", "指定要处理的文件路径")
+	file := flag.String("file", "", "指定要处理的文件路径") //默认文件路径是相对路径，不指定就为空字符串
 	operation := flag.String("operation", "", "指定操作类型（count、convert、upper）")
 	output := flag.String("output", "", "指定输出文件路径")
-	flag.Parse()
+	flag.Parse() //解析命令行参数并将结果存储在对应的变量中
 
 	return Config{
 		File:      *file,
