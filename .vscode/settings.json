@@ -1,4 +1,4 @@
 {
-  "code-runner.fileDirectoryAsCwd": true ,
+  // "code-runner.fileDirectoryAsCwd": true ,
   "code-runner.runInTerminal": true
 }
