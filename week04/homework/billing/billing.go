@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	BillingRuleVersion = "1.0.0"
+	BillingRuleVersion = "v1.0.0"
 
 	// 阶梯分界点
 	Tier1Limit float64 = 200
