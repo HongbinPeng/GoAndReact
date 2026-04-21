@@ -138,30 +138,34 @@ import (
 // 【为什么必须用包级变量，而不是每次 errors.New？】
 //
 // ❌ 错误做法：
-//   func probe() error {
-//       return errors.New("探测超时")  // 每次调用都创建新对象
-//   }
-//   // 调用方无法用 errors.Is 判断，因为地址每次都不同
+//
+//	func probe() error {
+//	    return errors.New("探测超时")  // 每次调用都创建新对象
+//	}
+//	// 调用方无法用 errors.Is 判断，因为地址每次都不同
 //
 // ✅ 正确做法：
-//   var ErrProbeTimeout = errors.New("探测超时")  // 全局唯一对象
-//   func probe() error {
-//       return fmt.Errorf("...: %w", ErrProbeTimeout)  // 包装它
-//   }
-//   // 调用方用 errors.Is(err, ErrProbeTimeout) 就能正确匹配
+//
+//	var ErrProbeTimeout = errors.New("探测超时")  // 全局唯一对象
+//	func probe() error {
+//	    return fmt.Errorf("...: %w", ErrProbeTimeout)  // 包装它
+//	}
+//	// 调用方用 errors.Is(err, ErrProbeTimeout) 就能正确匹配
 //
 // 【作业中你需要定义哪些哨兵错误？】
-//   var ErrProbeTimeout    = errors.New("探测超时")      // 网络超时
-//   var ErrProbeConnection = errors.New("连接被拒绝")     // TCP 连接失败
-//   var ErrStatusCode      = errors.New("HTTP 状态码异常") // 状态码不符合预期
-//   var ErrBodyMismatch    = errors.New("响应体不匹配")    // 关键词检查失败
+//
+//	var ErrProbeTimeout    = errors.New("探测超时")      // 网络超时
+//	var ErrProbeConnection = errors.New("连接被拒绝")     // TCP 连接失败
+//	var ErrStatusCode      = errors.New("HTTP 状态码异常") // 状态码不符合预期
+//	var ErrBodyMismatch    = errors.New("响应体不匹配")    // 关键词检查失败
 //
 // 这样 main 函数里可以针对不同错误做不同处理：
-//   if errors.Is(err, ErrProbeTimeout) {
-//       // 超时 → 标记为慢服务，可能需要告警
-//   } else if errors.Is(err, ErrStatusCode) {
-//       // 状态码异常 → 可能服务挂了
-//   }
+//
+//	if errors.Is(err, ErrProbeTimeout) {
+//	    // 超时 → 标记为慢服务，可能需要告警
+//	} else if errors.Is(err, ErrStatusCode) {
+//	    // 状态码异常 → 可能服务挂了
+//	}
 var ErrProbeTimeout = errors.New("探测超时")
 
 // =============================================================================
