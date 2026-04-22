@@ -88,7 +88,9 @@ import (
 
 // --- 方式 2：fmt.Errorf ---
 //
-// fmt.Errorf 创建一个带格式化上下文的错误。
+// func action(){
+// 	err := fmt.Errorf("描述信息: %w", errors.New("原始错误"))// 创建一个带格式化上下文的错误。
+// }
 // 最常用的形式：fmt.Errorf("描述信息: %w", 原始错误)
 //
 // %w 是 Go 1.13 引入的特殊格式动词（wrap）：

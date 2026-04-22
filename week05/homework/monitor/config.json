@@ -1,0 +1,72 @@
+{
+  "targets": [
+    {
+      "name": "百度搜索",
+      "protocol": "http",
+      "address": "https://www.baidu.com",
+      "expect": {
+        "status_code": 200
+      }
+    },
+    {
+      "name": "网易首页",
+      "protocol": "http",
+      "address": "https://www.163.com",
+      "expect": {
+        "status_code": 200
+      }
+    },
+    {
+      "name": "GitHub",
+      "protocol": "http",
+      "address": "https://github.com",
+      "expect": {
+        "status_code": 200
+      }
+    },
+    {
+      "name": "MySQL服务",
+      "protocol": "tcp",
+      "address": "localhost:3306",
+      "expect": {
+        "connected": true
+      }
+    },
+    {
+      "name": "本身SSH",
+      "protocol": "tcp",
+      "address": "localhost:22",
+      "expect": {
+        "connected": true
+      }
+    },
+    {
+      "name": "无效服务",
+      "protocol": "http",
+      "address": "https://not-exist-domain-123.com",
+      "retry_count": 1
+    },
+    {
+      "name": "B站API",
+      "protocol": "http",
+      "address": "https://api.bilibili.com/x/web-interface/nav",
+      "expect": {
+        "status_code": 200
+      }
+    },
+    {
+      "name": "Raw 文本文件",
+      "protocol": "http",
+      "address": "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt",
+      "expect": {
+        "contains": "Go"
+      }
+    },
+    {
+      "name": "慢速响应模拟",
+      "protocol": "http",
+      "address": "https://httpbin.org/delay/5",
+      "retry_count": 1
+    }
+  ]
+}

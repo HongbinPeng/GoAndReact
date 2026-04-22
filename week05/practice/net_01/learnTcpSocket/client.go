@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"time"
 )
 
 func main() {
-	lockByRead()
+	// lockByRead()
+	builderBatchTcp(10, "localhost:8000")
 	// conn, err := net.Dial("tcp", "localhost:8000")
 	// if err != nil {
 	// 	fmt.Print("出现错误", err.Error())
@@ -47,6 +49,17 @@ func lockByRead() {
 		return
 	}
 	fmt.Printf("客户端接受到:%s\n", string(b[:n])) //这里的n是读取到的字节数量，所以要使用b[:n]来获取读取到的字符串
+}
+func builderBatchTcp(num int, addr string) {
+	for i := 0; i < num; i++ {
+		conn, err := net.Dial("tcp", addr)
+		if err != nil {
+			fmt.Print("出现错误", err.Error())
+			return
+		}
+		defer conn.Close()
+		conn.Write([]byte("客户端消息" + strconv.Itoa(i))) //客户端发送消息给服务端
+	}
 }
 
 /*

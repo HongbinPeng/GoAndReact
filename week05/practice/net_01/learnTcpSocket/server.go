@@ -54,7 +54,7 @@ func handlerRequst(conn net.Conn) {
 // ============================================================================
 
 const (
-	maxConnections = 100         // 最大并发连接数
+	maxConnections = 100              // 最大并发连接数
 	readTimeout    = 10 * time.Second // 读超时：客户端 10 秒不发数据则断开
 	writeTimeout   = 5 * time.Second  // 写超时：客户端 5 秒不收数据则断开
 )
@@ -109,8 +109,8 @@ func handleSecureConn(conn net.Conn) {
 	for {
 		// 每次循环刷新读超时，防止连接永久挂起
 		conn.SetReadDeadline(time.Now().Add(readTimeout))
-
 		n, err := conn.Read(buffer)
+		//当客户端断开连接时，err会返回一个错误，这里需要判断是否是超时错误
 		if err != nil {
 			// 区分超时错误和普通错误
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
@@ -118,13 +118,11 @@ func handleSecureConn(conn net.Conn) {
 			} else {
 				fmt.Println("读取错误或客户端断开:", err)
 			}
-			return
+			return //return前还会执行defer conn.Close()，所以这里不需要关闭conn
 		}
-
 		// 处理数据
 		msg := string(buffer[:n])
 		fmt.Printf("收到数据: %s\n", msg)
-
 		// 发送响应前刷新写超时
 		conn.SetWriteDeadline(time.Now().Add(writeTimeout))
 		_, err = conn.Write([]byte("服务端已确认: " + msg))
