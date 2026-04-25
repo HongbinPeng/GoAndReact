@@ -1,13 +1,33 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
+
+type trackingReadCloser struct {
+	readCalls int
+	readFunc  func([]byte) (int, error)
+	closeFunc func() error
+}
+
+func (t *trackingReadCloser) Read(p []byte) (int, error) {
+	t.readCalls++
+	return t.readFunc(p)
+}
+
+func (t *trackingReadCloser) Close() error {
+	if t.closeFunc != nil {
+		return t.closeFunc()
+	}
+	return nil
+}
 
 func TestProbeHTTPSuccess(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +36,7 @@ func TestProbeHTTPSuccess(t *testing.T) {
 	}))
 	defer server.Close()
 
-	monitor := NewMonitor(2*time.Second, false)
+	monitor := NewMonitor(2*time.Second, false, "")
 	monitor.taskDelay = 0
 
 	expectCode := http.StatusOK
@@ -43,7 +63,7 @@ func TestProbeHTTPContainsFailure(t *testing.T) {
 	}))
 	defer server.Close()
 
-	monitor := NewMonitor(2*time.Second, false)
+	monitor := NewMonitor(2*time.Second, false, "")
 	monitor.taskDelay = 0
 
 	target := Target{
@@ -61,6 +81,94 @@ func TestProbeHTTPContainsFailure(t *testing.T) {
 	}
 }
 
+func TestProbeHTTPWithoutContainsDoesNotReadBody(t *testing.T) {
+	monitor := NewMonitor(2*time.Second, false, "")
+	monitor.taskDelay = 0
+
+	reader := &trackingReadCloser{
+		readFunc: func(p []byte) (int, error) {
+			return 0, errors.New("body should not be read")
+		},
+	}
+
+	monitor.httpClient = &httpClient{
+		do: func(req *httpRequest) (*httpResponse, error) {
+			return &httpResponse{
+				status:     "200 OK",
+				statusCode: 200,
+				body:       reader,
+			}, nil
+		},
+	}
+
+	expectCode := 200
+	target := Target{
+		Name:     "无需读取 body",
+		Protocol: "http",
+		Address:  "https://example.com",
+		Expect: Expectation{
+			StatusCode: &expectCode,
+		},
+	}
+
+	result := monitor.probeHTTP(target)
+	if !result.Success {
+		t.Fatalf("probeHTTP 应该成功，实际失败：%s", result.Error)
+	}
+	if reader.readCalls != 0 {
+		t.Fatalf("不包含 contains 条件时不应读取 body，实际读取次数 = %d", reader.readCalls)
+	}
+}
+
+func TestProbeHTTPContainsStopsAfterMatch(t *testing.T) {
+	monitor := NewMonitor(2*time.Second, false, "")
+	monitor.taskDelay = 0
+
+	reader := &trackingReadCloser{
+		readFunc: func(p []byte) (int, error) {
+			return copy(p, "prefix Go suffix"), nil
+		},
+	}
+
+	firstRead := true
+	reader.readFunc = func(p []byte) (int, error) {
+		if firstRead {
+			firstRead = false
+			return copy(p, "prefix Go suffix"), nil
+		}
+		return 0, errors.New("matched after first chunk, should not continue reading")
+	}
+
+	monitor.httpClient = &httpClient{
+		do: func(req *httpRequest) (*httpResponse, error) {
+			return &httpResponse{
+				status:     "200 OK",
+				statusCode: 200,
+				body:       reader,
+			}, nil
+		},
+	}
+
+	expectCode := 200
+	target := Target{
+		Name:     "流式 contains 匹配",
+		Protocol: "http",
+		Address:  "https://example.com",
+		Expect: Expectation{
+			StatusCode: &expectCode,
+			Contains:   "Go",
+		},
+	}
+
+	result := monitor.probeHTTP(target)
+	if !result.Success {
+		t.Fatalf("probeHTTP 应该成功，实际失败：%s", result.Error)
+	}
+	if reader.readCalls != 1 {
+		t.Fatalf("匹配后应该提前返回，实际读取次数 = %d", reader.readCalls)
+	}
+}
+
 func TestProbeTCPSuccess(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -75,7 +183,7 @@ func TestProbeTCPSuccess(t *testing.T) {
 		}
 	}()
 
-	monitor := NewMonitor(2*time.Second, false)
+	monitor := NewMonitor(2*time.Second, false, "")
 	monitor.taskDelay = 0
 
 	target := Target{
@@ -91,7 +199,7 @@ func TestProbeTCPSuccess(t *testing.T) {
 }
 
 func TestExecuteWithRetrySucceedsOnSecondAttempt(t *testing.T) {
-	monitor := NewMonitor(2*time.Second, false)
+	monitor := NewMonitor(2*time.Second, false, "")
 	monitor.taskDelay = 0
 
 	attempts := 0
@@ -141,7 +249,7 @@ func TestExecuteWithRetrySucceedsOnSecondAttempt(t *testing.T) {
 }
 
 func TestCustomHTTPClientTimeoutFailure(t *testing.T) {
-	monitor := NewMonitor(100*time.Millisecond, false)
+	monitor := NewMonitor(100*time.Millisecond, false, "")
 	monitor.taskDelay = 0
 	monitor.httpClient = &httpClient{
 		do: func(req *httpRequest) (*httpResponse, error) {
@@ -150,8 +258,7 @@ func TestCustomHTTPClientTimeoutFailure(t *testing.T) {
 				return &httpResponse{
 					status:     "200 OK",
 					statusCode: 200,
-					body:       []byte("ok"),
-					close:      func() error { return nil },
+					body:       io.NopCloser(strings.NewReader("ok")),
 				}, nil
 			case <-req.ctx.Done():
 				return nil, req.ctx.Err()
@@ -172,7 +279,7 @@ func TestCustomHTTPClientTimeoutFailure(t *testing.T) {
 }
 
 func TestHTTPClientRequestCarriesContext(t *testing.T) {
-	monitor := NewMonitor(2*time.Second, false)
+	monitor := NewMonitor(2*time.Second, false, "")
 	monitor.taskDelay = 0
 
 	monitor.httpClient = &httpClient{
@@ -191,8 +298,7 @@ func TestHTTPClientRequestCarriesContext(t *testing.T) {
 			return &httpResponse{
 				status:     "200 OK",
 				statusCode: 200,
-				body:       []byte("Go"),
-				close:      func() error { return nil },
+				body:       io.NopCloser(strings.NewReader("Go")),
 			}, nil
 		},
 	}
@@ -215,7 +321,7 @@ func TestHTTPClientRequestCarriesContext(t *testing.T) {
 }
 
 func TestProbeTCPFailure(t *testing.T) {
-	monitor := NewMonitor(50*time.Millisecond, false)
+	monitor := NewMonitor(50*time.Millisecond, false, "")
 	monitor.taskDelay = 0
 
 	target := Target{
