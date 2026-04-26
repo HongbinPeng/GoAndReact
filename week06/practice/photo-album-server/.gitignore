@@ -1,0 +1,5 @@
+*.db
+uploads/
+.gocache/
+.tmp/
+jietu.md
