@@ -21,7 +21,7 @@ type Album struct {
 	Description string    `gorm:"column:description" json:"description"`
 	IsPublic    bool      `gorm:"column:is_public" json:"is_public"`
 	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
-	User        User      `gorm:"foreignKey:UserID;references:ID" json:"-"`
+	User        User      `gorm:"foreignKey:UserID;references:ID" json:"-"` //
 }
 
 func (Album) TableName() string {

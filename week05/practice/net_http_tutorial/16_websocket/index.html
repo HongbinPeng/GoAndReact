@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket 群聊</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #messages { height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+        .system { color: #888; font-style: italic; }
+        .chat { margin: 5px 0; }
+        .username { font-weight: bold; }
+        .timestamp { color: #666; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket 群聊</h1>
+    
+    <div id="online-users">
+        <strong>在线用户:</strong>
+        <span id="online-list">暂无</span>
+    </div>
+    
+    <div id="messages"></div>
+    
+    <input type="text" id="messageInput" placeholder="输入消息..." style="width: 70%;">
+    <button onclick="sendMessage()">发送</button>
+    
+    <script>
+        // 获取用户名
+        const username = prompt("请输入您的用户名:") || "匿名用户";
+        
+        // 连接 WebSocket
+        const ws = new WebSocket(`ws://${window.location.host}/ws?username=${encodeURIComponent(username)}`);
+        
+        // 连接成功
+        ws.onopen = function() {
+            console.log('连接成功');
+        };
+        
+        // 接收消息
+        ws.onmessage = function(event) {
+            const msg = JSON.parse(event.data);
+            displayMessage(msg);
+        };
+        
+        // 显示消息
+        function displayMessage(msg) {
+            const messages = document.getElementById('messages');
+            const timestamp = new Date(msg.timestamp).toLocaleTimeString();
+            
+            if (msg.type === 'join' || msg.type === 'leave') {
+                // 系统消息
+                messages.innerHTML += `<div class="system">[${timestamp}] ${msg.username} ${msg.content}</div>`;
+            } else if (msg.type === 'chat') {
+                // 聊天消息
+                messages.innerHTML += `<div class="chat"><span class="timestamp">[${timestamp}]</span> <span class="username">${msg.username}:</span> ${msg.content}</div>`;
+            } else if (msg.type === 'online') {
+                // 更新在线列表
+                document.getElementById('online-list').textContent = msg.online.join(', ');
+            }
+            
+            // 滚动到底部
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            if (content) {
+                ws.send(JSON.stringify({
+                    username: username,
+                    content: content
+                }));
+                input.value = '';
+            }
+        }
+        
+        // 回车发送
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
