@@ -8,10 +8,9 @@
 
 ## 项目说明
 
-本项目基于 `gin-vue-admin` 进行二次开发，我在二开的过程中发现并修复了当初始化sqlite数据库dbPath为空时，初始化后端服务重启后登录失败的Bug，同时完成了任务二，即用户最后登录行为追踪。
+本项目基于 `gin-vue-admin` 进行二次开发，我在二开的过程中发现并修复了后端服务重启后登录失败的Bug，同时完成了任务二，即用户最后登录行为追踪。
 
-- 开发问题记录： [Problem.md](./gin-fullstack/Problem.md)
-
+- 开发问题记录： [Problem.md](./Problem.md)
 
 ## 开发任务索引
 
@@ -19,7 +18,7 @@
 
 - 将项目数据库运行环境切换为 SQLite。
 - 完成初始化页面选择 SQLite 的流程验证。
-- 修复 SQLite 在 `dbPath` 为空时，初始化阶段与重启阶段 DSN 路径不一致的问题，具体的Bug发现和修复请参考[Problem.md](./gin-fullstack/Problem.md)。
+- 修复 SQLite 在 `dbPath` 为空时，初始化阶段与重启阶段 DSN 路径不一致的问题，具体的Bug发现和修复请参考[Problem.md](./Problem.md)。
 - 确保服务重启后仍能连接到同一个数据库文件并正常登录。
 
 ### 任务 2：用户最后登录行为追踪
@@ -50,11 +49,11 @@
 
 围绕任务 2，我按“模型层 -> 业务层 -> 接口层 -> 前端展示层”的链路完成实现：
 
-- 在 `server/model/system/sys_user.go` 中为 `SysUser` 增加最后登录 IP、最后登录时间字段[用户实体字段添加](./gin-fullstack/server/model/system/sys_user.go#L35)
-- 在 `server/service/system/sys_user.go` 中新增用户最后登录信息更新方法 [更新数据库中用户登录IP与时间](./gin-fullstack/server/service/system/sys_user.go#L63)
-- 在 `server/api/v1/system/sys_user.go` 的登录成功流程中记录 `c.ClientIP()` 和当前登录时间 [登录接口添加登录记录逻辑](./gin-fullstack/server/api/v1/system/sys_user.go#L120)
+- 在 `server/model/system/sys_user.go` 中为 `SysUser` 增加最后登录 IP、最后登录时间字段[用户实体字段添加](./server/model/system/sys_user.go#L35)
+- 在 `server/service/system/sys_user.go` 中新增用户最后登录信息更新方法 [用户服务方法添加](./server/service/system/sys_user.go#L63)
+- 在 `server/api/v1/system/sys_user.go` 的登录成功流程中记录 `c.ClientIP()` 和当前登录时间 [登录接口添加](./server/api/v1/system/sys_user.go#L120)
 - 通过 Gorm 自动迁移将新增字段同步到 `sys_users` 表
-- 在 `web/src/view/superAdmin/user/user.vue` 中新增列表列并格式化时间展示 [前端展示添加](./gin-fullstack/web/src/view/superAdmin/user/user.vue#L41)
+- 在 `web/src/view/superAdmin/user/user.vue` 中新增列表列并格式化时间展示 [前端展示添加](./web/src/view/superAdmin/user/user.vue#L41)
 
 当前实现以“最后一次成功登录”为准，不把普通页面刷新或 token 自动续签当作新的登录事件。
 
@@ -84,6 +83,7 @@ go run main.go
 - 管理员进入“用户管理”页面后，可以看到新增用户的“登录IP”“登录时间”
 - 登录时间显示格式为 `YYYY-MM-DD HH:mm`
 
+
 # SQLite 初始化 DSN 路径不一致导致重启后登录失败Bug
 
 ## 问题描述
@@ -103,7 +103,7 @@ go run main.go
 
 ### 初始化阶段和重启阶段 DSN 不一致
 
-**初始化时**的 DSN 生成（[`server/model/system/request/sys_init.go:48`](./gin-fullstack/server/model/system/request/sys_init.go#L48)）：
+**初始化时**的 DSN 生成（[`server/model/system/request/sys_init.go:48`](./server/model/system/request/sys_init.go#L48)）：
 
 ```go
 func (i *InitDB) SqliteEmptyDsn() string {
@@ -116,7 +116,7 @@ func (i *InitDB) SqliteEmptyDsn() string {
 - Windows: `\gva.db` → 当前盘符根目录（如 `C:\gva.db`）
 - Linux: `/gva.db` → 系统根目录
 
-**重启时**后端程序会读入`server/config.yaml`中的sqlite.path,DSN 生成代码（[`server/config/gorm_sqlite.go:12`](./gin-fullstack/server/config/gorm_sqlite.go#L12)）：
+**重启时**后端程序会读入`server/config.yaml`中的sqlite.path,DSN 生成代码（[`server/config/gorm_sqlite.go:12`](./server/config/gorm_sqlite.go#L12)）：
 
 ```go
 func (s *Sqlite) Dsn() string {
@@ -146,9 +146,9 @@ sqlite:
 而下次服务重启后由于 `config.yaml` 中的 `sqlite.path` 为空，导致 DSN 值为 `gva.db`，从而打开的是 `server\gva.db`。
 这就导致了重启后登录失败的问题。其根本原因是第一次数据库初始化和第二次重启服务得到的数据库文件路径不一致。
 
-![](./gin-fullstack/ReademeImg/用户名不存在或密码错误.png)
+![](./ReademeImg/用户名不存在或密码错误.png)
 
-![](./gin-fullstack/ReademeImg/表未初始化.png)
+![](./ReademeImg/表未初始化.png)
 
 ## 影响范围
 
